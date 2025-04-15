@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Eye, Printer, Pencil } from "lucide-react";
-import ModalCreateQuote from "./modalSaveQuote"; // Make sure the path is correct
+import ModalCreateQuote from "./modalSaveQuote";
 
 const quotes = [
   {
@@ -48,13 +48,12 @@ export default function QuotesTable() {
 
   const handleSaveQuote = (newQuote) => {
     console.log("Nueva cotización:", newQuote);
-    // Aquí puedes actualizar el estado global o llamar a la API
   };
 
   return (
     <div className="bg-white p-6 rounded-xl shadow-md">
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-3">
         <h2 className="text-xl font-bold">Gestión de Cotizaciones</h2>
         <button
           onClick={() => setModalOpen(true)}
@@ -85,8 +84,8 @@ export default function QuotesTable() {
         </select>
       </div>
 
-      {/* Tabla */}
-      <div className="overflow-x-auto">
+      {/* Tabla (desktop) */}
+      <div className="overflow-x-auto hidden md:block">
         <table className="min-w-full border-separate border-spacing-y-2 text-sm text-gray-700">
           <thead className="text-xs uppercase text-gray-500">
             <tr>
@@ -106,11 +105,7 @@ export default function QuotesTable() {
                 <td className="px-4 py-2">{q.fecha}</td>
                 <td className="px-4 py-2">{q.total}</td>
                 <td className="px-4 py-2">
-                  <span
-                    className={`text-xs font-semibold px-3 py-1 rounded-full ${badgeColor[q.color]}`}
-                  >
-                    {q.estatus}
-                  </span>
+                  <span className={`text-xs font-semibold px-3 py-1 rounded-full ${badgeColor[q.color]}`}>{q.estatus}</span>
                 </td>
                 <td className="px-4 py-2 flex items-center gap-3">
                   <Eye className="w-4 h-4 text-red-500 cursor-pointer hover:scale-110 transition" />
@@ -121,6 +116,35 @@ export default function QuotesTable() {
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Vista móvil (cards) */}
+      <div className="md:hidden space-y-4">
+        {quotes.map((q, idx) => (
+          <div key={idx} className="bg-gray-50 border border-gray-200 rounded-lg p-4 shadow-sm">
+            <p className="text-sm font-medium text-gray-700">
+              <strong>ID:</strong> {q.id}
+            </p>
+            <p className="text-sm">
+              <strong>Cliente:</strong> {q.cliente}
+            </p>
+            <p className="text-sm">
+              <strong>Fecha:</strong> {q.fecha}
+            </p>
+            <p className="text-sm">
+              <strong>Total:</strong> {q.total}
+            </p>
+            <p className="text-sm mb-2">
+              <strong>Estatus:</strong>{" "}
+              <span className={`text-xs font-semibold px-3 py-1 rounded-full ${badgeColor[q.color]}`}>{q.estatus}</span>
+            </p>
+            <div className="flex gap-3 pt-2">
+              <Eye className="w-4 h-4 text-red-500 cursor-pointer hover:scale-110 transition" />
+              <Printer className="w-4 h-4 text-gray-600 cursor-pointer hover:scale-110 transition" />
+              <Pencil className="w-4 h-4 text-yellow-500 cursor-pointer hover:scale-110 transition" />
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Paginación */}
