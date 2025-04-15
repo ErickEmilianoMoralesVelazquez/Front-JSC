@@ -46,10 +46,10 @@ export default function PaymentsTable() {
   return (
     <div className="bg-white p-6 rounded-xl shadow-md">
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-6">
         <h2 className="text-xl font-bold">Gestión de Pagos</h2>
         <button className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm flex items-center gap-2">
-          <span className="text-lg font-bold"><Download className="w-4 h-4"/></span> Exportar tabla
+          <Download className="w-4 h-4" /> Exportar tabla
         </button>
       </div>
 
@@ -71,8 +71,8 @@ export default function PaymentsTable() {
         </select>
       </div>
 
-      {/* Tabla */}
-      <div className="overflow-x-auto">
+      {/* Tabla (solo desktop) */}
+      <div className="overflow-x-auto hidden md:block">
         <table className="min-w-full border-separate border-spacing-y-2 text-sm text-gray-700">
           <thead className="text-xs uppercase text-gray-500">
             <tr>
@@ -105,6 +105,42 @@ export default function PaymentsTable() {
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Vista móvil (cards) */}
+      <div className="md:hidden space-y-4">
+        {payments.map((p, idx) => (
+          <div
+            key={idx}
+            className="bg-gray-50 border border-gray-200 rounded-lg p-4 shadow-sm"
+          >
+            <p className="text-sm font-medium text-blue-600 underline cursor-pointer">
+              {p.id}
+            </p>
+            <p className="text-sm">
+              <strong>Cliente:</strong> {p.cliente}
+            </p>
+            <p className="text-sm">
+              <strong>Creación:</strong> {p.creacion}
+            </p>
+            <p className="text-sm">
+              <strong>Pedido:</strong> {p.pedido}
+            </p>
+            <p className="text-sm mb-2">
+              <strong>Estatus:</strong>{" "}
+              <span
+                className={`text-xs font-semibold px-3 py-1 rounded-full ${badgeColor[p.color]}`}
+              >
+                {p.estatus}
+              </span>
+            </p>
+            <div className="flex gap-3 pt-2">
+              <Eye className="w-4 h-4 text-red-500 cursor-pointer hover:scale-110 transition" />
+              <Printer className="w-4 h-4 text-gray-600 cursor-pointer hover:scale-110 transition" />
+              <Pencil className="w-4 h-4 text-yellow-500 cursor-pointer hover:scale-110 transition" />
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Paginación */}

@@ -1,6 +1,6 @@
-import { Eye, Printer, Pencil, Download } from "lucide-react";
 import React, { useState } from "react";
-import ModalCreateInvoice from "./modalSaveInvoice"; // ajusta la ruta si es necesario
+import { Download, Printer, Pencil } from "lucide-react";
+import ModalCreateInvoice from "./modalSaveInvoice";
 
 const invoicesData = [
   {
@@ -54,7 +54,7 @@ export default function InvoicesTable() {
   return (
     <div className="bg-white p-6 rounded-xl shadow-md">
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-3">
         <h2 className="text-xl font-bold">Gestión de Facturas y Remisiones</h2>
         <button
           onClick={() => setIsModalOpen(true)}
@@ -85,8 +85,8 @@ export default function InvoicesTable() {
         </select>
       </div>
 
-      {/* Tabla */}
-      <div className="overflow-x-auto">
+      {/* Tabla (desktop) */}
+      <div className="overflow-x-auto hidden md:block">
         <table className="min-w-full border-separate border-spacing-y-2 text-sm text-gray-700">
           <thead className="text-xs uppercase text-gray-500">
             <tr>
@@ -106,11 +106,7 @@ export default function InvoicesTable() {
                 <td className="px-4 py-2">{inv.fecha}</td>
                 <td className="px-4 py-2">{inv.pedido}</td>
                 <td className="px-4 py-2">
-                  <span
-                    className={`text-xs font-semibold px-3 py-1 rounded-full ${badgeColor[inv.color]}`}
-                  >
-                    {inv.estatus}
-                  </span>
+                  <span className={`text-xs font-semibold px-3 py-1 rounded-full ${badgeColor[inv.color]}`}>{inv.estatus}</span>
                 </td>
                 <td className="px-4 py-2 flex items-center gap-3">
                   <Download className="w-4 h-4 text-red-500 cursor-pointer hover:scale-110 transition" />
@@ -121,6 +117,35 @@ export default function InvoicesTable() {
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile cards */}
+      <div className="md:hidden space-y-4">
+        {invoices.map((inv, idx) => (
+          <div key={idx} className="bg-gray-50 border border-gray-200 rounded-lg p-4 shadow-sm">
+            <p className="text-sm font-medium text-gray-700">
+              <strong>Documento:</strong> {inv.doc}
+            </p>
+            <p className="text-sm">
+              <strong>Cliente:</strong> {inv.cliente}
+            </p>
+            <p className="text-sm">
+              <strong>Fecha:</strong> {inv.fecha}
+            </p>
+            <p className="text-sm">
+              <strong>Pedido:</strong> {inv.pedido}
+            </p>
+            <p className="text-sm mb-2">
+              <strong>Estatus:</strong>{" "}
+              <span className={`text-xs font-semibold px-3 py-1 rounded-full ${badgeColor[inv.color]}`}>{inv.estatus}</span>
+            </p>
+            <div className="flex gap-3 pt-2">
+              <Download className="w-4 h-4 text-red-500 cursor-pointer hover:scale-110 transition" />
+              <Printer className="w-4 h-4 text-gray-600 cursor-pointer hover:scale-110 transition" />
+              <Pencil className="w-4 h-4 text-yellow-500 cursor-pointer hover:scale-110 transition" />
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Paginación */}
