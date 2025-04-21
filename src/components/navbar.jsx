@@ -81,7 +81,7 @@ export default function Navbar() {
         <div className="hidden md:block ml-4">
           <a
             href="/login"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm whitespace-nowrap"
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm whitespace-nowrap"
           >
             Iniciar sesión
           </a>
@@ -159,7 +159,7 @@ export default function Navbar() {
           {/* Login móvil */}
           <a
             href="/login"
-            className="block bg-blue-600 hover:bg-blue-700 text-white text-center px-4 py-2 rounded-md mt-2"
+            className="block bg-red-600 hover:bg-red-700 text-white text-center px-4 py-2 rounded-md mt-2"
           >
             Iniciar sesión
           </a>
