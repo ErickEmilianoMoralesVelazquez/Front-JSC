@@ -78,43 +78,45 @@ export default function SidebarGasera() {
           </div>
 
           <div className="flex flex-col gap-4 mt-10 relative">
-            {/* Botón contacto con popover */}
-            <div className="relative">
-              <button
-                type="button"
-                onMouseEnter={() => setShowPopover(true)}
-                onMouseLeave={() => setShowPopover(false)}
-                className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-red-500 to-red-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:scale-[1.02] transition"
-              >
-                <UserCircle size={18} />
-                Contacto
-              </button>
-              
-              {/* Popover personalizado */}
-              <div
-                className={`absolute left-full ml-4 top-1/2 -translate-y-1/2 w-64 bg-white text-gray-500 rounded-lg shadow-lg border border-gray-200 transition-all duration-200 ${
-                  showPopover ? 'opacity-100 visible' : 'opacity-0 invisible'
-                }`}
-              >
-                {/* Flecha del popover */}
-                <div className="absolute top-1/2 -left-2 -translate-y-1/2 w-4 h-4 bg-white transform rotate-45 border-l border-b border-gray-200"></div>
-                
-                {/* Contenido del popover */}
-                <div className="relative z-10 bg-white rounded-lg overflow-hidden">
-                  <div className="px-3 py-2 bg-gray-100 border-b border-gray-200">
-                    <h3 className="font-semibold text-gray-900">
-                      Asesor Jorges
-                    </h3>
-                  </div>
-                  <div className="px-3 py-2">
-                    <p>
-                      ¿Necesitas ayuda? Contáctanos para recibir asesoría
-                      personalizada.
-                    </p>
+            <Link to={"https://w.app/jorgeslubricantes"}>
+              <div className="relative">
+                <button
+                  type="button"
+                  onMouseEnter={() => setShowPopover(true)}
+                  onMouseLeave={() => setShowPopover(false)}
+                  className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-red-500 to-red-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:scale-[1.02] transition"
+                >
+                  <UserCircle size={18} />
+                  Contacto
+                </button>
+
+                {/* Popover personalizado */}
+                <div
+                  className={`absolute left-full ml-4 top-1/2 -translate-y-1/2 w-64 bg-white text-gray-500 rounded-lg shadow-lg border border-gray-200 transition-all duration-200 ${
+                    showPopover ? "opacity-100 visible" : "opacity-0 invisible"
+                  }`}
+                >
+                  {/* Flecha del popover */}
+                  <div className="absolute top-1/2 -left-2 -translate-y-1/2 w-4 h-4 bg-white transform rotate-45 border-l border-b border-gray-200"></div>
+
+                  {/* Contenido del popover */}
+                  <div className="relative z-10 bg-white rounded-lg overflow-hidden">
+                    <div className="px-3 py-2 bg-gray-100 border-b border-gray-200">
+                      <h3 className="font-semibold text-gray-900">
+                        Asesor Jorges
+                      </h3>
+                    </div>
+                    <div className="px-3 py-2">
+                      <p>
+                        ¿Necesitas ayuda? Contáctanos para recibir asesoría
+                        personalizada.
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            </Link>
+            {/* Botón contacto con popover */}
 
             {/* Botón cerrar sesión */}
             <button
