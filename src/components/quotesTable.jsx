@@ -67,7 +67,7 @@ export default function QuotesTable() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <input
           type="text"
-          placeholder="Buscar pedido..."
+          placeholder="Buscar cotización..."
           className="border border-gray-300 px-3 py-2 rounded-md text-sm w-full"
         />
         <select className="border border-gray-300 px-3 py-2 rounded-md text-sm w-full">
@@ -84,12 +84,12 @@ export default function QuotesTable() {
         </select>
       </div>
 
-      {/* Tabla (desktop) */}
-      <div className="overflow-x-auto hidden md:block">
+      {/* Tabla (responsive) */}
+      <div className="overflow-x-auto">
         <table className="min-w-full border-separate border-spacing-y-2 text-sm text-gray-700">
           <thead className="text-xs uppercase text-gray-500">
             <tr>
-              <th className="text-left px-4 py-2">ID PEDIDO</th>
+              <th className="text-left px-4 py-2">ID COTIZACIÓN</th>
               <th className="text-left px-4 py-2">CLIENTE</th>
               <th className="text-left px-4 py-2">FECHA</th>
               <th className="text-left px-4 py-2">TOTAL</th>
@@ -100,51 +100,30 @@ export default function QuotesTable() {
           <tbody>
             {quotes.map((q, idx) => (
               <tr key={idx} className="bg-gray-50 hover:bg-gray-100 transition">
-                <td className="px-4 py-2">{q.id}</td>
-                <td className="px-4 py-2">{q.cliente}</td>
-                <td className="px-4 py-2">{q.fecha}</td>
-                <td className="px-4 py-2">{q.total}</td>
-                <td className="px-4 py-2">
-                  <span className={`text-xs font-semibold px-3 py-1 rounded-full ${badgeColor[q.color]}`}>{q.estatus}</span>
+                <td className="px-4 py-3 font-medium">{q.id}</td>
+                <td className="px-4 py-3">{q.cliente}</td>
+                <td className="px-4 py-3">{q.fecha}</td>
+                <td className="px-4 py-3">{q.total}</td>
+                <td className="px-4 py-3">
+                  <span
+                    className={`text-xs font-semibold px-3 py-1 rounded-full ${
+                      badgeColor[q.color]
+                    }`}
+                  >
+                    {q.estatus}
+                  </span>
                 </td>
-                <td className="px-4 py-2 flex items-center gap-3">
-                  <Eye className="w-4 h-4 text-red-500 cursor-pointer hover:scale-110 transition" />
-                  <Printer className="w-4 h-4 text-gray-600 cursor-pointer hover:scale-110 transition" />
-                  <Pencil className="w-4 h-4 text-yellow-500 cursor-pointer hover:scale-110 transition" />
+                <td className="px-4 py-3">
+                  <div className="flex items-center justify-start gap-3 h-full">
+                    <Eye className="w-4 h-4 text-blue-500 cursor-pointer hover:scale-110 transition" />
+                    <Printer className="w-4 h-4 text-gray-600 cursor-pointer hover:scale-110 transition" />
+                    <Pencil className="w-4 h-4 text-yellow-500 cursor-pointer hover:scale-110 transition" />
+                  </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-      </div>
-
-      {/* Vista móvil (cards) */}
-      <div className="md:hidden space-y-4">
-        {quotes.map((q, idx) => (
-          <div key={idx} className="bg-gray-50 border border-gray-200 rounded-lg p-4 shadow-sm">
-            <p className="text-sm font-medium text-gray-700">
-              <strong>ID:</strong> {q.id}
-            </p>
-            <p className="text-sm">
-              <strong>Cliente:</strong> {q.cliente}
-            </p>
-            <p className="text-sm">
-              <strong>Fecha:</strong> {q.fecha}
-            </p>
-            <p className="text-sm">
-              <strong>Total:</strong> {q.total}
-            </p>
-            <p className="text-sm mb-2">
-              <strong>Estatus:</strong>{" "}
-              <span className={`text-xs font-semibold px-3 py-1 rounded-full ${badgeColor[q.color]}`}>{q.estatus}</span>
-            </p>
-            <div className="flex gap-3 pt-2">
-              <Eye className="w-4 h-4 text-red-500 cursor-pointer hover:scale-110 transition" />
-              <Printer className="w-4 h-4 text-gray-600 cursor-pointer hover:scale-110 transition" />
-              <Pencil className="w-4 h-4 text-yellow-500 cursor-pointer hover:scale-110 transition" />
-            </div>
-          </div>
-        ))}
       </div>
 
       {/* Paginación */}
@@ -156,7 +135,7 @@ export default function QuotesTable() {
         <button className="w-9 h-9 border rounded-md">&gt;</button>
       </div>
 
-      {/* Modal */}
+      {/* Modal de creación */}
       <ModalCreateQuote
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}

@@ -38,18 +38,6 @@ export default function Landing() {
         </p>
         <Testimonials />
       </div>
-
-      <div className="w-full py-5 flex flex-col items-center justify-center text-center md:mt-10 mb-10">
-        <h1 className="font-bold text-5xl mb-2">
-          ¿Estás listo para transformar tu negocio?
-        </h1>
-        <p className="text-gray-500 max-w-3xl text-1xl">
-          Registrate y comienza a optimizar tus procesos de negocio.
-        </p>
-        <button className="border border-red-600 text-red-600 py-2 px-4 rounded-full mt-5 hover:bg-red-600 hover:text-white transition-colors cursor-pointer">
-          Registrarme
-        </button>
-      </div>
       <Footer />
     </div>
   );

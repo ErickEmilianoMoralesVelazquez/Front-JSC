@@ -85,8 +85,8 @@ export default function InvoicesTable() {
         </select>
       </div>
 
-      {/* Tabla (desktop) */}
-      <div className="overflow-x-auto hidden md:block">
+      {/* Tabla */}
+      <div className="overflow-x-auto">
         <table className="min-w-full border-separate border-spacing-y-2 text-sm text-gray-700">
           <thead className="text-xs uppercase text-gray-500">
             <tr>
@@ -100,52 +100,27 @@ export default function InvoicesTable() {
           </thead>
           <tbody>
             {invoices.map((inv, idx) => (
-              <tr key={idx} className="bg-gray-50 hover:bg-gray-100 transition">
-                <td className="px-4 py-2 text-blue-600 underline cursor-pointer">{inv.doc}</td>
-                <td className="px-4 py-2">{inv.cliente}</td>
-                <td className="px-4 py-2">{inv.fecha}</td>
-                <td className="px-4 py-2">{inv.pedido}</td>
-                <td className="px-4 py-2">
-                  <span className={`text-xs font-semibold px-3 py-1 rounded-full ${badgeColor[inv.color]}`}>{inv.estatus}</span>
+              <tr key={idx} className="bg-gray-50 hover:bg-gray-100 transition rounded-lg">
+                <td className="px-4 py-3 text-blue-600 underline cursor-pointer">{inv.doc}</td>
+                <td className="px-4 py-3">{inv.cliente}</td>
+                <td className="px-4 py-3">{inv.fecha}</td>
+                <td className="px-4 py-3">{inv.pedido}</td>
+                <td className="px-4 py-3">
+                  <span className={`text-xs font-semibold px-3 py-1 rounded-full ${badgeColor[inv.color]}`}>
+                    {inv.estatus}
+                  </span>
                 </td>
-                <td className="px-4 py-2 flex items-center gap-3">
-                  <Download className="w-4 h-4 text-red-500 cursor-pointer hover:scale-110 transition" />
-                  <Printer className="w-4 h-4 text-gray-600 cursor-pointer hover:scale-110 transition" />
-                  <Pencil className="w-4 h-4 text-yellow-500 cursor-pointer hover:scale-110 transition" />
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-3">
+                    <Download className="w-4 h-4 text-red-500 cursor-pointer hover:scale-110 transition" />
+                    <Printer className="w-4 h-4 text-gray-600 cursor-pointer hover:scale-110 transition" />
+                    <Pencil className="w-4 h-4 text-yellow-500 cursor-pointer hover:scale-110 transition" />
+                  </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-      </div>
-
-      {/* Mobile cards */}
-      <div className="md:hidden space-y-4">
-        {invoices.map((inv, idx) => (
-          <div key={idx} className="bg-gray-50 border border-gray-200 rounded-lg p-4 shadow-sm">
-            <p className="text-sm font-medium text-gray-700">
-              <strong>Documento:</strong> {inv.doc}
-            </p>
-            <p className="text-sm">
-              <strong>Cliente:</strong> {inv.cliente}
-            </p>
-            <p className="text-sm">
-              <strong>Fecha:</strong> {inv.fecha}
-            </p>
-            <p className="text-sm">
-              <strong>Pedido:</strong> {inv.pedido}
-            </p>
-            <p className="text-sm mb-2">
-              <strong>Estatus:</strong>{" "}
-              <span className={`text-xs font-semibold px-3 py-1 rounded-full ${badgeColor[inv.color]}`}>{inv.estatus}</span>
-            </p>
-            <div className="flex gap-3 pt-2">
-              <Download className="w-4 h-4 text-red-500 cursor-pointer hover:scale-110 transition" />
-              <Printer className="w-4 h-4 text-gray-600 cursor-pointer hover:scale-110 transition" />
-              <Pencil className="w-4 h-4 text-yellow-500 cursor-pointer hover:scale-110 transition" />
-            </div>
-          </div>
-        ))}
       </div>
 
       {/* Paginación */}

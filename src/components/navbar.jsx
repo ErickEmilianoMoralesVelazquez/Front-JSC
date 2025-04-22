@@ -69,9 +69,9 @@ export default function Navbar() {
                 >
                   Dashboard SuperAdmin
                 </Link>
-                <a href="#" className="block px-2 py-1 hover:text-blue-600">
+                <Link to="/dashboard/gasera/orders" className="block px-2 py-1 hover:text-blue-600">
                   Dashboard Gasera
-                </a>
+                </Link>
               </div>
             )}
           </li>
@@ -79,12 +79,12 @@ export default function Navbar() {
 
         {/* Login (desktop) */}
         <div className="hidden md:block ml-4">
-          <a
-            href="/login"
+          <Link
+            to="/login"
             className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm whitespace-nowrap"
           >
             Iniciar sesión
-          </a>
+          </Link>
         </div>
 
         {/* Botón móvil */}
@@ -149,20 +149,20 @@ export default function Navbar() {
                 >
                   Dashboard SuperAdmin
                 </Link>
-                <a href="#" className="block py-1 hover:text-blue-400">
+                <Link to="/dashboard/gasera/orders" className="block py-1 hover:text-blue-400">
                   Dashboard Gasera
-                </a>
+                </Link>
               </div>
             )}
           </div>
 
           {/* Login móvil */}
-          <a
-            href="/login"
+          <Link
+            to="/login"
             className="block bg-red-600 hover:bg-red-700 text-white text-center px-4 py-2 rounded-md mt-2"
           >
             Iniciar sesión
-          </a>
+          </Link>
         </div>
       )}
     </nav>
