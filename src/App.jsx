@@ -5,6 +5,8 @@ import OrdersTable from "./components/ordersTable";
 import Quotes from "./components/quotesTable";
 import InvoicesTable from "./components/invoicesTable";
 import PaymentsTable from "./components/paymentsTable";
+import BackorderTable from "./components/backorderTable";
+import UsersTable from "./components/usersTable";
 
 import DashboardLayoutGasera from "./pages/dashboardLayoutGasera";
 import OrdersGaseraTable from "./components/ordersGaseraTable";
@@ -28,6 +30,8 @@ export default function App() {
           <Route path="quotes" element={<Quotes />} />
           <Route path="invoices" element={<InvoicesTable />} />
           <Route path="payments" element={<PaymentsTable />} />
+          <Route path="backorders" element={<BackorderTable />} />
+          <Route path="users" element={<UsersTable />} />
         </Route>
 
         {/* Privado con layout de dashboard gasera */}

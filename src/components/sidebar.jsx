@@ -5,6 +5,7 @@ import {
   ClipboardList,
   LogOut,
   Menu,
+  User,
 } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
@@ -12,8 +13,9 @@ const menuItems = [
   { label: 'Revisión de pedidos', icon: <ClipboardList size={18} />, path: '/dashboard/superadmin' },
   { label: 'Cotizaciones', icon: <FileText size={18} />, path: '/dashboard/superadmin/quotes' },
   { label: 'Facturación/Remisión', icon: <DollarSign size={18} />, path: '/dashboard/superadmin/invoices' },
-  { label: 'Backorder/Faltantes', icon: <ClipboardList size={18} />, path: '#' },
+  { label: 'Backorder/Faltantes', icon: <ClipboardList size={18} />, path: '/dashboard/superadmin/backorders' },
   { label: 'Pagos', icon: <DollarSign size={18} />, path: '/dashboard/superadmin/payments' },
+  { label: 'Usuarios', icon: <User size={18} />, path: '/dashboard/superadmin/users' },
 ];
 
 export default function Sidebar() {
