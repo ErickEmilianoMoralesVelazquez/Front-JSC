@@ -45,7 +45,6 @@ const badgeColor = {
 export default function PaymentsTable() {
   return (
     <div className="bg-white p-6 rounded-xl shadow-md">
-      {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-6">
         <h2 className="text-xl font-bold">Gestión de Pagos</h2>
         <button className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm flex items-center gap-2">
@@ -53,7 +52,6 @@ export default function PaymentsTable() {
         </button>
       </div>
 
-      {/* Filtros */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <input
           type="text"
@@ -71,15 +69,15 @@ export default function PaymentsTable() {
         </select>
       </div>
 
-      {/* Tabla (solo desktop) */}
-      <div className="overflow-x-auto hidden md:block">
+      {/* Tabla única con diseño fluido */}
+      <div className="overflow-x-auto">
         <table className="min-w-full border-separate border-spacing-y-2 text-sm text-gray-700">
           <thead className="text-xs uppercase text-gray-500">
             <tr>
-              <th className="text-left px-4 py-2">ID PEDIDO</th>
+              <th className="text-left px-4 py-2">FACTURA</th>
               <th className="text-left px-4 py-2">CLIENTE</th>
-              <th className="text-left px-4 py-2">FECHA DE CREACIÓN</th>
-              <th className="text-left px-4 py-2">FECHA DE PAGO</th>
+              <th className="text-left px-4 py-2">CREACIÓN</th>
+              <th className="text-left px-4 py-2">PEDIDO</th>
               <th className="text-left px-4 py-2">ESTATUS</th>
               <th className="text-left px-4 py-2">ACCIONES</th>
             </tr>
@@ -87,19 +85,23 @@ export default function PaymentsTable() {
           <tbody>
             {payments.map((p, idx) => (
               <tr key={idx} className="bg-gray-50 hover:bg-gray-100 transition">
-                <td className="px-4 py-2 text-blue-600 underline cursor-pointer">{p.id}</td>
-                <td className="px-4 py-2">{p.cliente}</td>
-                <td className="px-4 py-2">{p.creacion}</td>
-                <td className="px-4 py-2">{p.pedido}</td>
-                <td className="px-4 py-2">
+                <td className="px-4 py-3 text-blue-600 underline cursor-pointer">
+                  {p.id}
+                </td>
+                <td className="px-4 py-3">{p.cliente}</td>
+                <td className="px-4 py-3">{p.creacion}</td>
+                <td className="px-4 py-3">{p.pedido}</td>
+                <td className="px-4 py-3">
                   <span className={`text-xs font-semibold px-3 py-1 rounded-full ${badgeColor[p.color]}`}>
                     {p.estatus}
                   </span>
                 </td>
-                <td className="px-4 py-2 flex items-center gap-3">
-                  <Eye className="w-4 h-4 text-red-500 cursor-pointer hover:scale-110 transition" />
-                  <Printer className="w-4 h-4 text-gray-600 cursor-pointer hover:scale-110 transition" />
-                  <Pencil className="w-4 h-4 text-yellow-500 cursor-pointer hover:scale-110 transition" />
+                <td className="px-4 py-3">
+                  <div className="flex items-center gap-3">
+                    <Eye className="w-4 h-4 text-blue-500 cursor-pointer hover:scale-110 transition" />
+                    <Printer className="w-4 h-4 text-gray-600 cursor-pointer hover:scale-110 transition" />
+                    <Pencil className="w-4 h-4 text-yellow-500 cursor-pointer hover:scale-110 transition" />
+                  </div>
                 </td>
               </tr>
             ))}
@@ -107,43 +109,6 @@ export default function PaymentsTable() {
         </table>
       </div>
 
-      {/* Vista móvil (cards) */}
-      <div className="md:hidden space-y-4">
-        {payments.map((p, idx) => (
-          <div
-            key={idx}
-            className="bg-gray-50 border border-gray-200 rounded-lg p-4 shadow-sm"
-          >
-            <p className="text-sm font-medium text-blue-600 underline cursor-pointer">
-              {p.id}
-            </p>
-            <p className="text-sm">
-              <strong>Cliente:</strong> {p.cliente}
-            </p>
-            <p className="text-sm">
-              <strong>Creación:</strong> {p.creacion}
-            </p>
-            <p className="text-sm">
-              <strong>Pedido:</strong> {p.pedido}
-            </p>
-            <p className="text-sm mb-2">
-              <strong>Estatus:</strong>{" "}
-              <span
-                className={`text-xs font-semibold px-3 py-1 rounded-full ${badgeColor[p.color]}`}
-              >
-                {p.estatus}
-              </span>
-            </p>
-            <div className="flex gap-3 pt-2">
-              <Eye className="w-4 h-4 text-red-500 cursor-pointer hover:scale-110 transition" />
-              <Printer className="w-4 h-4 text-gray-600 cursor-pointer hover:scale-110 transition" />
-              <Pencil className="w-4 h-4 text-yellow-500 cursor-pointer hover:scale-110 transition" />
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Paginación */}
       <div className="mt-6 flex justify-end space-x-2 text-sm">
         <button className="w-9 h-9 border rounded-md">&lt;</button>
         <button className="w-9 h-9 border rounded-md">1</button>
