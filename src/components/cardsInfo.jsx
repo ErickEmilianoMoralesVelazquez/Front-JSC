@@ -1,67 +1,55 @@
 import React from "react";
-import {
-  ClipboardList,
-  CreditCard,
-  Truck,
-  BarChart2,
-  Clock,
-  CheckCircle,
-} from "lucide-react";
 
-const features = [
+const cards = [
   {
-    title: "Gestión de pedidos",
-    description:
-      "Digitaliza todo el proceso de pedidos desde la solicitud hasta la entrega.",
-    icon: <ClipboardList className="text-white w-6 h-6" />,
+    img: "/images/Icono1.png",
+    title: "GESTIÓN DE PEDIDOS",
+    desc: "Digitaliza todo el proceso de pedidos desde la solicitud hasta la entrega.",
   },
   {
-    title: "Pagos simplificados",
-    description: "Flexibilidad de pagos además de facturación.",
-    icon: <CreditCard className="text-white w-6 h-6" />,
+    img: "/images/Icono2.png",
+    title: "PAGOS SIMPLIFICADOS",
+    desc: "Flexibilidad de pagos además de facturación.",
   },
   {
-    title: "Logística y entregas",
-    description: "Seguimiento de envíos y optimización de estatus por pedido.",
-    icon: <Truck className="text-white w-6 h-6" />,
+    img: "/images/Icono3.png",
+    title: "LOGÍSTICA Y ENTREGAS",
+    desc: "Seguimiento de envíos y optimización de estatus por pedido.",
   },
   {
-    title: "Análisis de datos",
-    description:
-      "Informes detallados y métricas para tomar mejores decisiones.",
-    icon: <BarChart2 className="text-white w-6 h-6" />,
+    img: "/images/Icono4.png",
+    title: "ANÁLISIS DE DATOS",
+    desc: "Informes detallados y métricas para tomar mejores decisiones.",
   },
   {
-    title: "Control en cualquier momento",
-    description:
-      "Monitoreo constante de todos los procesos desde cualquier dispositivo.",
-    icon: <Clock className="text-white w-6 h-6" />,
+    img: "/images/Icono5.png",
+    title: "CONTROL EN CUALQUIER MOMENTO",
+    desc: "Monitoreo constante de todos los procesos desde cualquier dispositivo.",
   },
   {
-    title: "Trazabilidad completa",
-    description:
-      "Historial detallado de cada transacción y acción en el sistema.",
-    icon: <CheckCircle className="text-white w-6 h-6" />,
+    img: "/images/Icono6.png",
+    title: "TRAZABILIDAD COMPLETA",
+    desc: "Historial detallado de cada transacción y acción en el sistema.",
   },
 ];
 
 export default function CardsInfo() {
   return (
-    <section className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 px-4 py-10">
-      {features.map((item, idx) => (
-        <div
-          key={idx}
-          className="rounded-lg border border-gray-300 bg-white p-6 shadow-sm transition hover:shadow-md"
-        >
-          <div className="flex justify-center">
-            <div className="bg-red-600 p-3 rounded-full mb-4">{item.icon}</div>
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 px-4 max-w-7xl mx-auto mt-10">
+      {cards.map((card, index) => (
+        <div key={index} className="flex flex-col items-center text-center relative">
+          <img src={card.img} alt={card.title} className="w-24 h-24 mb-4 z-10" />
+          <div className="bg-whit  p-4 pt-6 -mt-6 w-full max-w-xs">
+            <div className="bg-gradient-to-r from-yellow-300 to-yellow-500 rounded-t-xl text-center font-bold text-sm text-gray-800 py-2">
+              {card.title}
+            </div>
+            <div className="bg-white py-2 rounded-b-xl shadow-lg px-2">
+            <p className="mt-2 text-sm font-semibold text-gray-800">{card.desc}</p>
+
+            </div>
           </div>
-          <h3 className="text-center font-bold text-lg mb-2">{item.title}</h3>
-          <p className="text-center text-sm text-gray-600">
-            {item.description}
-          </p>
         </div>
       ))}
-    </section>
+    </div>
   );
 }

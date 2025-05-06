@@ -52,8 +52,8 @@ const MyLogin = () => {
           <div className="flex justify-center items-center w-full">
             <div className="flex flex-col w-full max-w-md bg-white rounded-lg p-4 md:p-8 shadow-lg">
               <div className="flex md:hidden flex-row items-center justify-center text-black space-x-3 mb-8">
-                <Warehouse className="w-8 h-8" />
-                <h1 className="text-2xl text-center">BodegaSegura</h1>
+                {/* <Warehouse className="w-8 h-8" /> */}
+                <h1 className="text-2xl text-center">Jorges Lubricantes</h1>
               </div>
 
               <h3 className="text-black text-lg">Bienvenido</h3>

@@ -13,6 +13,7 @@ import OrdersGaseraTable from "./components/ordersGaseraTable";
 import QuotesGaseraTable from "./components/quotesGaseraTable";
 
 import MyLogin from "./pages/login";
+import Cotizacion from "./components/Cotizacion";
 import React from "react";
 import "./App.css";
 
@@ -23,6 +24,7 @@ export default function App() {
         {/* Público */}
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<MyLogin />} />
+        <Route path="/cotizacion" element={<Cotizacion />} />
 
         {/* Privado con layout de dashboard */}
         <Route path="/dashboard/superadmin" element={<DashboardLayout />}>

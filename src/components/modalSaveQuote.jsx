@@ -23,10 +23,8 @@ export default function ModalSaveQuote({ isOpen, onClose, onSave }) {
             e.preventDefault();
             const form = e.target;
             const newQuote = {
-              cliente: form.cliente.value,
-              fecha: form.fecha.value,
-              total: form.total.value,
-              estatus: form.estatus.value,
+              clienteId: form.cliente.value,
+              pedidoId: form.pedido.value,
               archivo: form.archivo.files[0],
             };
             onSave(newQuote);
@@ -38,54 +36,38 @@ export default function ModalSaveQuote({ isOpen, onClose, onSave }) {
         >
           <div>
             <label className="block text-sm font-medium">Cliente</label>
-            <input
-              type="text"
+            <select
               name="cliente"
               required
               className="mt-1 w-full border border-gray-300 px-3 py-2 rounded-md text-sm"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium">Fecha</label>
-            <input
-              type="date"
-              name="fecha"
-              required
-              className="mt-1 w-full border border-gray-300 px-3 py-2 rounded-md text-sm"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium">Total</label>
-            <input
-              type="number"
-              name="total"
-              required
-              className="mt-1 w-full border border-gray-300 px-3 py-2 rounded-md text-sm"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium">Estatus</label>
-            <select
-              name="estatus"
-              required
-              className="mt-1 w-full border border-gray-300 px-3 py-2 rounded-md text-sm"
             >
-              <option value="">Selecciona</option>
-              <option value="Completado">Completado</option>
-              <option value="En proceso">En proceso</option>
-              <option value="Atrasado">Atrasado</option>
+              <option value="">Selecciona un cliente</option>
+              <option value="1">Cliente 1</option>
+              <option value="2">Cliente 2</option>
+              <option value="3">Cliente 3</option>
             </select>
           </div>
 
           <div>
-            <label className="block text-sm font-medium">Archivo (PDF/XML)</label>
+            <label className="block text-sm font-medium">Pedido</label>
+            <select
+              name="pedido"
+              required
+              className="mt-1 w-full border border-gray-300 px-3 py-2 rounded-md text-sm"
+            >
+              <option value="">Selecciona un pedido</option>
+              <option value="101">Pedido 101</option>
+              <option value="102">Pedido 102</option>
+              <option value="103">Pedido 103</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium">Archivo (solo PDF)</label>
             <input
               type="file"
               name="archivo"
-              accept=".pdf,.xml"
+              accept=".pdf"
               onChange={(e) =>
                 setFileName(e.target.files[0] ? e.target.files[0].name : "")
               }

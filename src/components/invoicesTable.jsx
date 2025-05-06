@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
+import DataTable from "react-data-table-component";
 import { Download, Printer, Pencil } from "lucide-react";
 import ModalCreateInvoice from "./modalSaveInvoice";
 
@@ -47,9 +48,77 @@ export default function InvoicesTable() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [invoices, setInvoices] = useState(invoicesData);
 
+  const [searchText, setSearchText] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("");
+  const [selectedClient, setSelectedClient] = useState("");
+
   const handleSave = (newInvoice) => {
-    setInvoices([...invoices, newInvoice]);
+    setInvoices((prev) => [...prev, newInvoice]);
   };
+
+  const filteredInvoices = useMemo(() => {
+    return invoices.filter((inv) => {
+      const matchesSearch =
+        inv.doc.toLowerCase().includes(searchText.toLowerCase()) ||
+        inv.pedido.toLowerCase().includes(searchText.toLowerCase());
+
+      const matchesStatus = selectedStatus
+        ? inv.estatus === selectedStatus
+        : true;
+
+      const matchesClient = selectedClient
+        ? inv.cliente === selectedClient
+        : true;
+
+      return matchesSearch && matchesStatus && matchesClient;
+    });
+  }, [searchText, selectedStatus, selectedClient, invoices]);
+
+  const columns = [
+    {
+      name: "Documento",
+      selector: (row) => row.doc,
+      cell: (row) => (
+        <span className="text-blue-600 underline cursor-pointer">
+          {row.doc}
+        </span>
+      ),
+      sortable: true,
+    },
+    {
+      name: "Cliente",
+      selector: (row) => row.cliente,
+      sortable: true,
+    },
+    {
+      name: "Fecha",
+      selector: (row) => row.fecha,
+    },
+    {
+      name: "Pedido",
+      selector: (row) => row.pedido,
+    },
+    {
+      name: "Estatus",
+      cell: (row) => (
+        <span
+          className={`text-xs font-semibold px-3 py-1 rounded-full ${badgeColor[row.color]}`}
+        >
+          {row.estatus}
+        </span>
+      ),
+    },
+    {
+      name: "Acciones",
+      cell: (row) => (
+        <div className="flex items-center gap-3">
+          <Download className="w-4 h-4 text-red-500 cursor-pointer hover:scale-110 transition" />
+          <Printer className="w-4 h-4 text-gray-600 cursor-pointer hover:scale-110 transition" />
+          <Pencil className="w-4 h-4 text-yellow-500 cursor-pointer hover:scale-110 transition" />
+        </div>
+      ),
+    },
+  ];
 
   return (
     <div className="bg-white p-6 rounded-xl shadow-md">
@@ -68,70 +137,48 @@ export default function InvoicesTable() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <input
           type="text"
-          placeholder="Buscar pedido..."
+          placeholder="Buscar documento o pedido..."
           className="border border-gray-300 px-3 py-2 rounded-md text-sm w-full"
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
         />
-        <select className="border border-gray-300 px-3 py-2 rounded-md text-sm w-full">
-          <option>Filtrar por estatus</option>
-          <option>Completado</option>
-          <option>En proceso</option>
-          <option>Atrasado</option>
+        <select
+          className="border border-gray-300 px-3 py-2 rounded-md text-sm w-full"
+          value={selectedStatus}
+          onChange={(e) => setSelectedStatus(e.target.value)}
+        >
+          <option value="">Filtrar por estatus</option>
+          <option value="Completado">Completado</option>
+          <option value="En proceso">En proceso</option>
+          <option value="Atrasado">Atrasado</option>
         </select>
-        <select className="border border-gray-300 px-3 py-2 rounded-md text-sm w-full">
-          <option>Filtrar por cliente</option>
-          <option>Gasera del Norte</option>
-          <option>Gasolinera Sureste</option>
-          <option>Distribuidora Central</option>
+        <select
+          className="border border-gray-300 px-3 py-2 rounded-md text-sm w-full"
+          value={selectedClient}
+          onChange={(e) => setSelectedClient(e.target.value)}
+        >
+          <option value="">Filtrar por cliente</option>
+          <option value="Gasera del Norte">Gasera del Norte</option>
+          <option value="Gasolinera Sureste">Gasolinera Sureste</option>
+          <option value="Distribuidora Central">Distribuidora Central</option>
         </select>
       </div>
 
-      {/* Tabla */}
-      <div className="overflow-x-auto">
-        <table className="min-w-full border-separate border-spacing-y-2 text-sm text-gray-700">
-          <thead className="text-xs uppercase text-gray-500">
-            <tr>
-              <th className="text-left px-4 py-2">DOCUMENTO</th>
-              <th className="text-left px-4 py-2">CLIENTE</th>
-              <th className="text-left px-4 py-2">FECHA</th>
-              <th className="text-left px-4 py-2">PEDIDO</th>
-              <th className="text-left px-4 py-2">ESTATUS</th>
-              <th className="text-left px-4 py-2">ACCIONES</th>
-            </tr>
-          </thead>
-          <tbody>
-            {invoices.map((inv, idx) => (
-              <tr key={idx} className="bg-gray-50 hover:bg-gray-100 transition rounded-lg">
-                <td className="px-4 py-3 text-blue-600 underline cursor-pointer">{inv.doc}</td>
-                <td className="px-4 py-3">{inv.cliente}</td>
-                <td className="px-4 py-3">{inv.fecha}</td>
-                <td className="px-4 py-3">{inv.pedido}</td>
-                <td className="px-4 py-3">
-                  <span className={`text-xs font-semibold px-3 py-1 rounded-full ${badgeColor[inv.color]}`}>
-                    {inv.estatus}
-                  </span>
-                </td>
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-3">
-                    <Download className="w-4 h-4 text-red-500 cursor-pointer hover:scale-110 transition" />
-                    <Printer className="w-4 h-4 text-gray-600 cursor-pointer hover:scale-110 transition" />
-                    <Pencil className="w-4 h-4 text-yellow-500 cursor-pointer hover:scale-110 transition" />
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {/* Tabla con filtros activos */}
+      <DataTable
+        columns={columns}
+        data={filteredInvoices}
+        pagination
+        paginationComponentOptions={{
+          rowsPerPageText: "Filas por página",
+          rangeSeparatorText: "de",
+        }}
+        highlightOnHover
+        responsive
+        striped
+      />
 
-      {/* Paginación */}
-      <div className="mt-6 flex justify-end space-x-2 text-sm">
-        <button className="w-9 h-9 border rounded-md">&lt;</button>
-        <button className="w-9 h-9 border rounded-md">1</button>
-        <button className="w-9 h-9 bg-red-500 text-white rounded-md">2</button>
-        <button className="w-9 h-9 border rounded-md">3</button>
-        <button className="w-9 h-9 border rounded-md">&gt;</button>
-      </div>
-
+      {/* Modal */}
       <ModalCreateInvoice
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
