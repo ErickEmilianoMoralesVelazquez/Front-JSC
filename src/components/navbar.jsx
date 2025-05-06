@@ -8,7 +8,7 @@ import { Link } from "react-router-dom";
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [submenuOpen, setSubmenuOpen] = useState(null); // 'terminos', 'dashboards', or null
+  const [submenuOpen, setSubmenuOpen] = useState(null);
 
   const toggleSubmenu = (name) => {
     setSubmenuOpen(submenuOpen === name ? null : name);
@@ -17,102 +17,73 @@ export default function Navbar() {
   return (
     <nav className="bg-[#111719] text-white w-full shadow-sm z-50">
       <div className="max-w-screen-xl mx-auto flex items-center justify-between px-4 py-3 relative">
-        {/* Logo */}
-        <span className="text-lg md:text-xl font-bold whitespace-nowrap">
-          Servicios Corporativos Flotillas
-        </span>
+        {/* Logo + Título */}
+        <div className="flex items-center gap-x-4 lg:justify-start justify-center w-full lg:w-auto">
+          <img
+            src="/src/assets/images/LOGO.png"
+            alt="Jorges Lubricantes"
+            className="h-8 object-contain flex-shrink-0"
+          />
+          <span className="text-base lg:text-sm font-bold hidden lg:block">
+            Servicios Corporativos Flotillas
+          </span>
+        </div>
 
-        {/* Desktop nav */}
-        <ul className="hidden md:flex items-center space-x-6 text-sm">
-          <li>
-            <a href="#" className="hover:text-blue-500 whitespace-nowrap">
-              Manual
-            </a>
-          </li>
-          <li>
-            <a href="#" className="hover:text-blue-500 whitespace-nowrap">
-              Capacitaciones
-            </a>
-          </li>
+        {/* Navegación desktop */}
+        <ul className="hidden lg:flex items-center gap-x-6 text-sm">
+          <li><a href="#" className="hover:text-blue-500">Manual</a></li>
+          <li><a href="#" className="hover:text-blue-500">Capacitaciones</a></li>
           <li className="relative">
-            <button
-              onClick={() => toggleSubmenu("terminos")}
-              className="flex items-center gap-1 hover:text-blue-500 whitespace-nowrap"
-            >
+            <button onClick={() => toggleSubmenu("terminos")} className="flex items-center gap-1 hover:text-blue-500">
               Términos y Condiciones <ChevronDownIcon className="w-4 h-4" />
             </button>
             {submenuOpen === "terminos" && (
-              <div className="absolute left-1/2 -translate-x-1/2 mt-2 bg-white text-black rounded-md shadow-md px-4 py-2 z-50">
-                <a href="#" className="block px-2 py-1 hover:text-blue-600">
-                  Pólizas
-                </a>
+              <div className="absolute left-0 mt-2 bg-white text-black rounded-md shadow-md px-4 py-2 z-50">
+                <a href="#" className="block px-2 py-1 hover:text-blue-600">Pólizas</a>
               </div>
             )}
           </li>
           <li>
-            <a href="#" className="hover:text-blue-500 whitespace-nowrap">
-              Contacto
-            </a>
+            <Link to="https://web.whatsapp.com/send?phone=7771681311&text=%C2%A1Hola" className="hover:text-blue-500">Contacto</Link>
           </li>
           <li className="relative">
-            <button
-              onClick={() => toggleSubmenu("dashboards")}
-              className="flex items-center gap-1 hover:text-blue-500 whitespace-nowrap"
-            >
+            <button onClick={() => toggleSubmenu("dashboards")} className="flex items-center gap-1 hover:text-blue-500">
               Dashboards <ChevronDownIcon className="w-4 h-4" />
             </button>
             {submenuOpen === "dashboards" && (
-              <div className="absolute left-1/2 -translate-x-1/2 mt-2 bg-white text-black rounded-md shadow-md px-4 py-2 z-50">
-                <Link
-                  to="/dashboard/superadmin"
-                  className="block px-2 py-1 hover:text-blue-600"
-                >
-                  Dashboard SuperAdmin
-                </Link>
-                <Link to="/dashboard/gasera/orders" className="block px-2 py-1 hover:text-blue-600">
-                  Dashboard Gasera
-                </Link>
+              <div className="absolute left-0 mt-2 bg-white text-black rounded-md shadow-md px-4 py-2 z-50">
+                <Link to="/dashboard/superadmin" className="block px-2 py-1 hover:text-blue-600">Dashboard SuperAdmin</Link>
+                <Link to="/dashboard/gasera/orders" className="block px-2 py-1 hover:text-blue-600">Dashboard Gasera</Link>
               </div>
             )}
           </li>
         </ul>
 
-        {/* Login (desktop) */}
-        <div className="hidden md:block ml-4">
-          <Link
-            to="/login"
-            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm whitespace-nowrap"
-          >
+        {/* Login desktop */}
+        <div className="hidden lg:block">
+          <Link to="/login" className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm">
             Iniciar sesión
           </Link>
         </div>
 
-        {/* Botón móvil */}
-        <div className="md:hidden">
+        {/* Botón menú móvil */}
+        <div className="lg:hidden">
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="inline-flex items-center p-2 text-sm text-gray-400 hover:bg-gray-700 rounded-lg"
           >
-            {mobileMenuOpen ? (
-              <XMarkIcon className="w-6 h-6" />
-            ) : (
-              <Bars3Icon className="w-6 h-6" />
-            )}
+            {mobileMenuOpen ? <XMarkIcon className="w-6 h-6" /> : <Bars3Icon className="w-6 h-6" />}
           </button>
         </div>
       </div>
 
       {/* Menú móvil */}
       {mobileMenuOpen && (
-        <div className="px-4 pb-4 md:hidden text-sm space-y-1">
-          <a href="#" className="block py-2 hover:text-blue-500">
-            Manual
-          </a>
-          <a href="#" className="block py-2 hover:text-blue-500">
-            Capacitaciones
-          </a>
+        <div className="px-4 pb-4 lg:hidden text-sm space-y-1">
+          <a href="#" className="block py-2 hover:text-blue-500">Manual</a>
+          <a href="#" className="block py-2 hover:text-blue-500">Capacitaciones</a>
 
-          {/* Submenú móvil - Términos */}
+          {/* Submenú Términos */}
           <div>
             <button
               onClick={() => toggleSubmenu("terminos")}
@@ -121,19 +92,18 @@ export default function Navbar() {
               Términos y Condiciones <ChevronDownIcon className="w-4 h-4" />
             </button>
             {submenuOpen === "terminos" && (
-              <div className="pl-4 space-y-1">
-                <a href="#" className="block py-1 hover:text-blue-400">
-                  Pólizas
-                </a>
+              <div className="pl-4">
+                <a href="#" className="block py-1 hover:text-blue-400">Pólizas</a>
               </div>
             )}
           </div>
 
-          <a href="#" className="block py-2 hover:text-blue-500">
+          {/* Contacto */}
+          <Link to="https://web.whatsapp.com/send?phone=7771681311&text=%C2%A1Hola" className="block py-2 hover:text-blue-500">
             Contacto
-          </a>
+          </Link>
 
-          {/* Submenú móvil - Dashboards */}
+          {/* Submenú Dashboards */}
           <div>
             <button
               onClick={() => toggleSubmenu("dashboards")}
@@ -142,25 +112,15 @@ export default function Navbar() {
               Dashboards <ChevronDownIcon className="w-4 h-4" />
             </button>
             {submenuOpen === "dashboards" && (
-              <div className="pl-4 space-y-1">
-                <Link
-                  to="/dashboard/superadmin"
-                  className="block py-1 hover:text-blue-400"
-                >
-                  Dashboard SuperAdmin
-                </Link>
-                <Link to="/dashboard/gasera/orders" className="block py-1 hover:text-blue-400">
-                  Dashboard Gasera
-                </Link>
+              <div className="pl-4">
+                <Link to="/dashboard/superadmin" className="block py-1 hover:text-blue-400">Dashboard SuperAdmin</Link>
+                <Link to="/dashboard/gasera/orders" className="block py-1 hover:text-blue-400">Dashboard Gasera</Link>
               </div>
             )}
           </div>
 
           {/* Login móvil */}
-          <Link
-            to="/login"
-            className="block bg-red-600 hover:bg-red-700 text-white text-center px-4 py-2 rounded-md mt-2"
-          >
+          <Link to="/login" className="block bg-red-600 hover:bg-red-700 text-white text-center px-4 py-2 rounded-md mt-2">
             Iniciar sesión
           </Link>
         </div>

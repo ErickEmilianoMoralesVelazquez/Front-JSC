@@ -2,7 +2,7 @@ import React from "react";
 
 export default function Footer() {
   return (
-    <footer className="bg-white ">
+    <footer className="bg-transparent ">
       <div className="mx-auto max-w-screen-xl px-4 pt-16 pb-8 sm:px-6 lg:px-8 lg:pt-24">
         <div className="text-center">
           <h2 className="text-3xl font-extrabold text-gray-900 sm:text-5xl ">
@@ -21,7 +21,7 @@ export default function Footer() {
           </a>
         </div>
 
-        <div className="mt-16 border-t border-gray-100 pt-8 sm:flex sm:items-center sm:justify-between lg:mt-24 ">
+        <div className="mt-16 border-t border-gray-400 pt-8 sm:flex sm:items-center sm:justify-between lg:mt-24 ">
           <ul className="flex flex-wrap justify-center gap-4 text-xs lg:justify-end">
             <li>
               <a

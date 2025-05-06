@@ -1,101 +1,71 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 
-export default function carousel() {
+const slides = [
+  {
+    src: "/images/slider-1.png",
+    alt: "Slider 1",
+  },
+  {
+    src: "/images/slider-2.jpg",
+    alt: "Slider 2",
+  },
+  {
+    src: "/images/slider-3.jpg",
+    alt: "Slider 3",
+  },
+  {
+    src: "/images/slider-4.jpg",
+    alt: "Slider 4",
+  },
+];
+
+export default function Carousel() {
+  const [current, setCurrent] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrent((prev) => (prev + 1) % slides.length);
+    }, 5000); // cambia cada 5 segundos
+
+    return () => clearInterval(interval); // limpia en desmontaje
+  }, []);
+
+  const goToNext = () => {
+    setCurrent((prev) => (prev + 1) % slides.length);
+  };
+
+  const goToPrev = () => {
+    setCurrent((prev) => (prev - 1 + slides.length) % slides.length);
+  };
+
   return (
-    <div id="controls-carousel" className="relative w-full h-full" data-carousel="static">
-      <div className="relative h-35 overflow-hidden md:h-[600px]">
-        {/* <!-- Item 1 --> */}
-        <div className="hidden duration-700 ease-in-out" data-carousel-item>
-          <img
-            src="https://placehold.co/1440x600"
-            className="absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"
-            alt="..."
-          />
-        </div>
-        {/* <!-- Item 2 --> */}
-        <div
-          className="hidden duration-700 ease-in-out"
-          data-carousel-item="active"
-        >
-          <img
-            src="https://placehold.co/1440x600"
-            className="absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"
-            alt="..."
-          />
-        </div>
-        {/* <!-- Item 3 --> */}
-        <div className="hidden duration-700 ease-in-out" data-carousel-item>
-          <img
-            src="https://placehold.co/1440x600"
-            className="absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"
-            alt="..."
-          />
-        </div>
-        {/* <!-- Item 4 --> */}
-        <div className="hidden duration-700 ease-in-out" data-carousel-item>
-          <img
-            src="https://placehold.co/1440x600"
-            className="absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"
-            alt="..."
-          />
-        </div>
-        {/* <!-- Item 5 --> */}
-        <div className="hidden duration-700 ease-in-out" data-carousel-item>
-          <img
-            src="https://placehold.co/1440x600"
-            className="absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2"
-            alt="..."
-          />
-        </div>
-      </div>
-      {/* <!-- Slider controls --> */}
+    <div className="relative w-full h-[300px] sm:h-[400px] md:h-[600px] overflow-hidden">
+      {slides.map((slide, index) => (
+        <img
+          key={index}
+          src={slide.src}
+          alt={slide.alt}
+          className={`absolute w-full h-full object-cover transition-opacity duration-700 ${
+            index === current ? "opacity-100" : "opacity-0"
+          }`}
+          loading="lazy"
+        />
+      ))}
+
+      {/* Botón anterior */}
       <button
-        type="button"
-        className="absolute top-0 start-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none"
-        data-carousel-prev
+        onClick={goToPrev}
+        className="absolute top-1/2 left-4 -translate-y-1/2 bg-white/30 hover:bg-white/50 text-black p-2 rounded-full z-10 cursor-pointer"
       >
-        <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 dark:bg-gray-800/30 group-hover:bg-white/50 dark:group-hover:bg-gray-800/60 group-focus:ring-4 group-focus:ring-white dark:group-focus:ring-gray-800/70 group-focus:outline-none">
-          <svg
-            className="w-4 h-4 text-white dark:text-gray-800 rtl:rotate-180"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 6 10"
-          >
-            <path
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M5 1 1 5l4 4"
-            />
-          </svg>
-          <span className="sr-only">Previous</span>
-        </span>
+        ‹
       </button>
+
+      {/* Botón siguiente */}
       <button
-        type="button"
-        className="absolute top-0 end-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none"
-        data-carousel-next
+        onClick={goToNext}
+        className="absolute top-1/2 right-4 -translate-y-1/2 bg-white/30 hover:bg-white/50 text-black p-2 rounded-full z-10 cursor-pointer"
       >
-        <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 dark:bg-gray-800/30 group-hover:bg-white/50 dark:group-hover:bg-gray-800/60 group-focus:ring-4 group-focus:ring-white dark:group-focus:ring-gray-800/70 group-focus:outline-none">
-          <svg
-            className="w-4 h-4 text-white dark:text-gray-800 rtl:rotate-180"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 6 10"
-          >
-            <path
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="m1 9 4-4-4-4"
-            />
-          </svg>
-          <span className="sr-only">Next</span>
-        </span>
+        ›
       </button>
     </div>
   );

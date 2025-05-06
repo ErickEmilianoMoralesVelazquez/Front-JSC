@@ -6,9 +6,25 @@ export default function DashboardLayout() {
   return (
     <div className="flex w-full overflow-x-hidden">
       <SidebarGasera />
-      <main className="flex-1 bg-gray-100 min-h-screen px-4 py-6 overflow-x-hidden">
-        <Outlet />
-      </main>
+      <div className="flex-1 flex flex-col min-h-screen overflow-x-hidden">
+        {/* Navbar con fondo de imagen */}
+        <div
+          className="w-full h-26 bg-cover bg-center"
+          style={{
+            backgroundImage: "url('/src/assets/images/logos-nav.png')",
+          }}
+        />
+
+        {/* Contenido principal con fondo de imagen */}
+        <main
+          className="flex-1 bg-cover bg-no-repeat bg-center px-4 py-6"
+          style={{
+            backgroundImage: "url('/src/assets/images/bg-pedidos.png')",
+          }}
+        >
+          <Outlet />
+        </main>
+      </div>
     </div>
   );
 }

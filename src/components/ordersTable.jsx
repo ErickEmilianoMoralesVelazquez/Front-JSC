@@ -1,4 +1,5 @@
 import React from "react";
+import DataTable from "react-data-table-component"; // ✅ Importación necesaria
 import DashboardCards from "./dashboardCards";
 
 export default function OrdersTable() {
@@ -47,56 +48,49 @@ export default function OrdersTable() {
           className="mb-4 w-full border border-gray-300 px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
 
-        {/* Tabla responsiva para todas las vistas */}
-        <div className="overflow-x-auto">
-          <table className="min-w-full border-separate border-spacing-y-2 text-sm text-gray-700">
-            <thead className="text-xs uppercase text-gray-500">
-              <tr>
-                <th className="text-left px-4 py-2">ID PEDIDO</th>
-                <th className="text-left px-4 py-2">CLIENTE</th>
-                <th className="text-left px-4 py-2">FECHA</th>
-                <th className="text-left px-4 py-2">TOTAL</th>
-                <th className="text-left px-4 py-2">ESTATUS</th>
-              </tr>
-            </thead>
-            <tbody>
-              {orders.map((order, idx) => (
-                <tr
-                  key={idx}
-                  className="bg-gray-50 hover:bg-gray-100 transition rounded-lg"
+        <DataTable
+          columns={[
+            {
+              name: "ID Pedido",
+              selector: (row) => row.id,
+              sortable: true,
+            },
+            {
+              name: "Cliente",
+              selector: (row) => row.cliente,
+              sortable: true,
+            },
+            {
+              name: "Fecha",
+              selector: (row) => row.fecha,
+            },
+            {
+              name: "Total",
+              selector: (row) => row.total,
+            },
+            {
+              name: "Estatus",
+              cell: (row) => (
+                <span
+                  className={`text-xs font-semibold px-3 py-1 rounded-full ${
+                    badgeColor[row.color]
+                  }`}
                 >
-                  <td className="px-4 py-3 font-medium">{order.id}</td>
-                  <td className="px-4 py-3">{order.cliente}</td>
-                  <td className="px-4 py-3">{order.fecha}</td>
-                  <td className="px-4 py-3">{order.total}</td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`text-xs font-semibold px-3 py-1 rounded-full ${badgeColor[order.color]}`}
-                    >
-                      {order.estatus}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Paginación */}
-        <div className="mt-6 flex justify-end space-x-2">
-          {[1, 2, 3].map((n) => (
-            <button
-              key={n}
-              className={`w-9 h-9 border rounded-md ${
-                n === 2
-                  ? "bg-red-500 text-white"
-                  : "text-gray-700 hover:bg-gray-100"
-              }`}
-            >
-              {n}
-            </button>
-          ))}
-        </div>
+                  {row.estatus}
+                </span>
+              ),
+            },
+          ]}
+          data={orders}
+          pagination
+          paginationComponentOptions={{
+            rowsPerPageText: "Filas por página",
+            rangeSeparatorText: "de",
+          }}
+          highlightOnHover
+          responsive
+          striped
+        />
       </div>
     </>
   );

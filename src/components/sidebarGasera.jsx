@@ -78,7 +78,7 @@ export default function SidebarGasera() {
           </div>
 
           <div className="flex flex-col gap-4 mt-10 relative">
-            <Link to={"https://w.app/jorgeslubricantes"}>
+            <Link to={"https://web.whatsapp.com/send?phone=7771681311&text=%C2%A1Hola"}>
               <div className="relative">
                 <button
                   type="button"

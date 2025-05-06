@@ -25,7 +25,7 @@ const steps = [
 
 export default function ProcessSteps() {
   return (
-    <section className="w-full py-12 px-6 flex flex-col items-center justify-center">
+    <section className="w-full py-12 px-6 flex flex-col items-center justify-center md:mt-3">
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10 w-full max-w-6xl text-center">
         {steps.map((step, index) => (
           <div
@@ -36,7 +36,7 @@ export default function ProcessSteps() {
               {step.number}
             </div>
             <h3 className="text-xl font-bold mb-2">{step.title}</h3>
-            <p className="text-gray-500 text-base">{step.description}</p>
+            <p className="text-gray-900 text-base">{step.description}</p>
           </div>
         ))}
       </div>
