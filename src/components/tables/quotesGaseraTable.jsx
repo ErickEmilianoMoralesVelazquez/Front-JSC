@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import DataTable from "react-data-table-component";
 import { Eye, CheckCircle, XCircle } from "lucide-react";
-import ModalDetails from "./modalDetails";
+import ModalDetails from "../modals/modalDetails";
 
 const initialQuotes = [
   { id: "COT-2025-001", fecha: "10/04/2023", total: "$12,450.00", estatus: "Pendiente", color: "yellow" },

@@ -1,9 +1,9 @@
 import React, { useState, useMemo } from "react";
 import DataTable from "react-data-table-component";
-import DashboardGaseraCards from "./dashboardGaseraCards";
-import ModalCreateOrder from "./modalCreateOrder";
-import ModalEditOrder from "./modalEditOrder";
-import ModalUploadImage from "./modalUploadImage";
+import DashboardGaseraCards from "../dashboard/dashboardGaseraCards";
+import ModalCreateOrder from "../modals/modalCreateOrder";
+import ModalEditOrder from "../modals/modalEditOrder";
+import ModalUploadImage from "../modals/modalUploadImage";
 import { Eye, Pencil, Trash2 } from "lucide-react";
 
 export default function OrdersGaseraTable() {

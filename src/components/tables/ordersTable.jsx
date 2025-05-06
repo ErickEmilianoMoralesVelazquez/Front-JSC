@@ -1,6 +1,6 @@
 import React from "react";
 import DataTable from "react-data-table-component"; // ✅ Importación necesaria
-import DashboardCards from "./dashboardCards";
+import DashboardCards from "../dashboard/dashboardCards";
 
 export default function OrdersTable() {
   const orders = [

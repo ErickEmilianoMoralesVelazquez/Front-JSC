@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import DataTable from "react-data-table-component";
 import { Eye, Pencil, Trash2, Plus } from "lucide-react";
-import ModalCreateUser from "./modalCreateUser";
-import ModalEditUser from "./modalEditUser";
-import ModalViewUser from "./modalViewUser";
+import ModalCreateUser from "../modals/modalCreateUser";
+import ModalEditUser from "../modals/modalEditUser";
+import ModalViewUser from "../modals/modalViewUser";
 
 const initialUsers = [
   {
