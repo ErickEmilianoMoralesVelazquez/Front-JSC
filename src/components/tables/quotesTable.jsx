@@ -1,39 +1,41 @@
 import React, { useState, useMemo } from "react";
 import DataTable from "react-data-table-component";
-import { Download, Printer, Pencil } from "lucide-react";
-import ModalCreateInvoice from "./modalSaveInvoice";
+import { Eye, Printer, Pencil } from "lucide-react";
+import { pdf } from "@react-pdf/renderer";
+import CotizacionPDF from "../cotizacionPDF";
+import ModalCreateQuote from "../modals/modalSaveQuote";
 
-const invoicesData = [
+const originalQuotes = [
   {
-    doc: "FAC-2025-01.pdf",
+    id: "COT-2025-001",
     cliente: "Gasera del Norte",
     fecha: "10/04/2023",
-    pedido: "PED-2025-001",
-    estatus: "Completado",
+    total: "$12,450.00",
+    estatus: "Aceptada",
     color: "green",
   },
   {
-    doc: "FAC-2025-02.pdf",
+    id: "COT-2025-002",
     cliente: "Gasolinera Sureste",
     fecha: "09/04/2023",
-    pedido: "PED-2025-002",
+    total: "$8,720.00",
     estatus: "En proceso",
     color: "yellow",
   },
   {
-    doc: "FAC-2025-03.pdf",
+    id: "COT-2025-003",
     cliente: "Distribuidora Central",
     fecha: "08/04/2023",
-    pedido: "PED-2025-003",
-    estatus: "Atrasado",
+    total: "$15,300.00",
+    estatus: "Rechazada",
     color: "red",
   },
   {
-    doc: "FAC-2025-04.pdf",
+    id: "COT-2025-004",
     cliente: "Gasera del Norte",
     fecha: "10/04/2023",
-    pedido: "PED-2025-004",
-    estatus: "Completado",
+    total: "$12,450.00",
+    estatus: "Aceptada",
     color: "green",
   },
 ];
@@ -44,45 +46,32 @@ const badgeColor = {
   red: "bg-red-100 text-red-700",
 };
 
-export default function InvoicesTable() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [invoices, setInvoices] = useState(invoicesData);
+export default function QuotesTable() {
+  const [modalOpen, setModalOpen] = useState(false);
 
   const [searchText, setSearchText] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
   const [selectedClient, setSelectedClient] = useState("");
 
-  const handleSave = (newInvoice) => {
-    setInvoices((prev) => [...prev, newInvoice]);
+  const handleSaveQuote = (newQuote) => {
+    console.log("Nueva cotización:", newQuote);
   };
 
-  const filteredInvoices = useMemo(() => {
-    return invoices.filter((inv) => {
-      const matchesSearch =
-        inv.doc.toLowerCase().includes(searchText.toLowerCase()) ||
-        inv.pedido.toLowerCase().includes(searchText.toLowerCase());
-
-      const matchesStatus = selectedStatus
-        ? inv.estatus === selectedStatus
-        : true;
-
-      const matchesClient = selectedClient
-        ? inv.cliente === selectedClient
-        : true;
-
-      return matchesSearch && matchesStatus && matchesClient;
-    });
-  }, [searchText, selectedStatus, selectedClient, invoices]);
+  const handleDownloadPDF = async (quote) => {
+    const blob = await pdf(<CotizacionPDF data={quote} />).toBlob();
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${quote.id}.pdf`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const columns = [
     {
-      name: "Documento",
-      selector: (row) => row.doc,
-      cell: (row) => (
-        <span className="text-blue-600 underline cursor-pointer">
-          {row.doc}
-        </span>
-      ),
+      name: "ID Cotización",
+      selector: (row) => row.id,
       sortable: true,
     },
     {
@@ -95,8 +84,8 @@ export default function InvoicesTable() {
       selector: (row) => row.fecha,
     },
     {
-      name: "Pedido",
-      selector: (row) => row.pedido,
+      name: "Total",
+      selector: (row) => row.total,
     },
     {
       name: "Estatus",
@@ -111,25 +100,38 @@ export default function InvoicesTable() {
     {
       name: "Acciones",
       cell: (row) => (
-        <div className="flex items-center gap-3">
-          <Download className="w-4 h-4 text-red-500 cursor-pointer hover:scale-110 transition" />
-          <Printer className="w-4 h-4 text-gray-600 cursor-pointer hover:scale-110 transition" />
+        <div className="flex items-center justify-start gap-3 h-full">
+          <Eye className="w-4 h-4 text-blue-500 cursor-pointer hover:scale-110 transition" />
+          <Printer
+            className="w-4 h-4 text-gray-600 cursor-pointer hover:scale-110 transition"
+            onClick={() => handleDownloadPDF(row)}
+          />
           <Pencil className="w-4 h-4 text-yellow-500 cursor-pointer hover:scale-110 transition" />
         </div>
       ),
     },
   ];
 
+  // 🔍 Filtrado combinado con useMemo
+  const filteredQuotes = useMemo(() => {
+    return originalQuotes.filter((quote) => {
+      const matchesSearch = quote.id.toLowerCase().includes(searchText.toLowerCase());
+      const matchesStatus = selectedStatus ? quote.estatus === selectedStatus : true;
+      const matchesClient = selectedClient ? quote.cliente === selectedClient : true;
+      return matchesSearch && matchesStatus && matchesClient;
+    });
+  }, [searchText, selectedStatus, selectedClient]);
+
   return (
     <div className="bg-white p-6 rounded-xl shadow-md">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-3">
-        <h2 className="text-xl font-bold">Gestión de Facturas y Remisiones</h2>
+        <h2 className="text-xl font-bold">Gestión de Cotizaciones</h2>
         <button
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => setModalOpen(true)}
           className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm flex items-center gap-2"
         >
-          <span className="text-lg font-bold">+</span> Nueva Factura
+          <span className="text-lg font-bold">+</span> Nueva Cotización
         </button>
       </div>
 
@@ -137,7 +139,7 @@ export default function InvoicesTable() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <input
           type="text"
-          placeholder="Buscar documento o pedido..."
+          placeholder="Buscar cotización..."
           className="border border-gray-300 px-3 py-2 rounded-md text-sm w-full"
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
@@ -148,9 +150,9 @@ export default function InvoicesTable() {
           onChange={(e) => setSelectedStatus(e.target.value)}
         >
           <option value="">Filtrar por estatus</option>
-          <option value="Completado">Completado</option>
+          <option value="Aceptada">Aceptada</option>
           <option value="En proceso">En proceso</option>
-          <option value="Atrasado">Atrasado</option>
+          <option value="Rechazada">Rechazada</option>
         </select>
         <select
           className="border border-gray-300 px-3 py-2 rounded-md text-sm w-full"
@@ -164,10 +166,10 @@ export default function InvoicesTable() {
         </select>
       </div>
 
-      {/* Tabla con filtros activos */}
+      {/* Tabla */}
       <DataTable
         columns={columns}
-        data={filteredInvoices}
+        data={filteredQuotes}
         pagination
         paginationComponentOptions={{
           rowsPerPageText: "Filas por página",
@@ -178,11 +180,11 @@ export default function InvoicesTable() {
         striped
       />
 
-      {/* Modal */}
-      <ModalCreateInvoice
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSave={handleSave}
+      {/* Modal de creación */}
+      <ModalCreateQuote
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSave={handleSaveQuote}
       />
     </div>
   );

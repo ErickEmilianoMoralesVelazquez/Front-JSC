@@ -1,10 +1,10 @@
 import React from "react";
 import { motion } from "framer-motion";
-import Carousel from "../components/carousel";
-import CardsInfo from "../components/cardsInfo";
-import Testimonials from "../components/testimonials";
-import Navbar from "../components/navbar";
-import Footer from "../components/footer";
+import Carousel from "../components/sections/carousel";
+import CardsInfo from "../components/sections/cardsInfo";
+import Testimonials from "../components//common/testimonials";
+import Navbar from "../components/common/navbar";
+import Footer from "../components/common/footer";
 
 import landingBg from "../assets/images/Landing.png";
 import landingImage2 from "../assets/images/landingImage2.png";

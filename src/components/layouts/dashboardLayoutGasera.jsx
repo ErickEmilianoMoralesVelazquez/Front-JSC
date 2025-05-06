@@ -1,18 +1,17 @@
-import Sidebar from "../components/sidebar";
+import SidebarGasera from "../common/sidebarGasera";
 import { Outlet } from "react-router-dom";
 import React from "react";
 
 export default function DashboardLayout() {
   return (
     <div className="flex w-full overflow-x-hidden">
-      <Sidebar />
+      <SidebarGasera />
       <div className="flex-1 flex flex-col min-h-screen overflow-x-hidden">
         {/* Navbar con fondo de imagen */}
         <div
           className="w-full h-26 bg-cover bg-center"
           style={{
             backgroundImage: "url('/src/assets/images/logos-nav.png')",
-            backgroundColor: "#3c3d3f",
           }}
         />
 

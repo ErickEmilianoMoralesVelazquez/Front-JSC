@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { pdf } from "@react-pdf/renderer";
-import RequisitionPDF from "./requisitionPdf";
+import RequisitionPDF from "../requisitionPdf";
 
 export default function ModalCreateOrder({ isOpen, onClose, onCreate }) {
   const [form, setForm] = useState({

@@ -1,16 +1,16 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Landing from "./pages/landing";
-import DashboardLayout from "./pages/dashboardLayout";
-import OrdersTable from "./components/ordersTable";
-import Quotes from "./components/quotesTable";
-import InvoicesTable from "./components/invoicesTable";
-import PaymentsTable from "./components/paymentsTable";
-import BackorderTable from "./components/backorderTable";
-import UsersTable from "./components/usersTable";
+import DashboardLayout from "./components/layouts/dashboardLayout";
+import OrdersTable from "./components/tables/ordersTable";
+import Quotes from "./components/tables/quotesTable";
+import InvoicesTable from "./components/tables/invoicesTable";
+import PaymentsTable from "./components/tables/paymentsTable";
+import BackorderTable from "./components/tables/backorderTable";
+import UsersTable from "./components/tables/usersTable";
 
-import DashboardLayoutGasera from "./pages/dashboardLayoutGasera";
-import OrdersGaseraTable from "./components/ordersGaseraTable";
-import QuotesGaseraTable from "./components/quotesGaseraTable";
+import DashboardLayoutGasera from "./components/layouts/dashboardLayoutGasera";
+import OrdersGaseraTable from "./components/tables/ordersGaseraTable";
+import QuotesGaseraTable from "./components/tables/quotesGaseraTable";
 
 import MyLogin from "./pages/login";
 import Cotizacion from "./components/Cotizacion";
