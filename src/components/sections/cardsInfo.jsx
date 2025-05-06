@@ -38,7 +38,7 @@ export default function CardsInfo() {
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 px-4 max-w-7xl mx-auto mt-10">
       {cards.map((card, index) => (
         <div key={index} className="flex flex-col items-center text-center relative">
-          <img src={card.img} alt={card.title} className="w-24 h-24 mb-4 z-10" />
+          <img src={card.img} alt={card.title} className="w-40 h-37 mb-4 z-10" />
           <div className="bg-whit  p-4 pt-6 -mt-6 w-full max-w-xs">
             <div className="bg-gradient-to-r from-yellow-300 to-yellow-500 rounded-t-xl text-center font-bold text-sm text-gray-800 py-2">
               {card.title}

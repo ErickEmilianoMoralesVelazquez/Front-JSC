@@ -7,6 +7,7 @@ import Navbar from "../components/common/navbar";
 import Footer from "../components/common/footer";
 
 import landingBg from "../assets/images/Landing.png";
+import landingImage from "../assets/images/landingImage.png";
 import landingImage2 from "../assets/images/landingImage2.png";
 
 // Imágenes individuales del proceso
@@ -61,6 +62,11 @@ export default function Landing() {
         whileInView="visible"
         viewport={{ once: true, amount: 0.1 }}
       >
+        <img
+          src={landingImage}
+          alt="Decoración izquierda"
+          className="hidden xl:block absolute left-0 top-8 w-52 lg:w-64 xl:w-80"
+        />
         <h1 className="font-bold text-5xl mb-4">¿Cómo funciona?</h1>
         <p className="text-gray-900 max-w-3xl text-xl md:mb-10 px-4">
           Conoce nuestro flujo de trabajo paso a paso.
