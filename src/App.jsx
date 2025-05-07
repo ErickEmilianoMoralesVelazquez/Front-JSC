@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Landing from "./pages/landing";
+
+// Superadmin
 import DashboardLayout from "./components/layouts/dashboardLayout";
 import OrdersTable from "./components/tables/ordersTable";
 import Quotes from "./components/tables/quotesTable";
@@ -8,6 +10,7 @@ import PaymentsTable from "./components/tables/paymentsTable";
 import BackorderTable from "./components/tables/backorderTable";
 import UsersTable from "./components/tables/usersTable";
 
+// Gasera
 import DashboardLayoutGasera from "./components/layouts/dashboardLayoutGasera";
 import OrdersGaseraTable from "./components/tables/ordersGaseraTable";
 import QuotesGaseraTable from "./components/tables/quotesGaseraTable";

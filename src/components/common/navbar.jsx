@@ -16,30 +16,27 @@ export default function Navbar() {
 
   return (
     <nav className="bg-[#111719] text-white w-full shadow-sm z-50">
-      <div className="max-w-screen-xl mx-auto flex items-center justify-between px-4 py-3 relative">
+      <div className="max-w-screen-xl mx-auto flex items-center justify-between px-2 py-3 relative">
         {/* Logo + Título */}
         <div className="flex items-center gap-x-4 lg:justify-start justify-center w-full lg:w-auto">
           <img
-            src="/src/assets/images/LOGO.png"
+            src="/public/Logo.svg"
             alt="Jorges Lubricantes"
-            className="h-8 object-contain flex-shrink-0"
+            className="h-12 object-contain flex-shrink-0"
           />
-          <span className="text-base lg:text-sm font-bold hidden lg:block">
-            Servicios Corporativos Flotillas
-          </span>
         </div>
 
         {/* Navegación desktop */}
         <ul className="hidden lg:flex items-center gap-x-6 text-sm">
-          <li><a href="#" className="hover:text-blue-500">Manual</a></li>
-          <li><a href="#" className="hover:text-blue-500">Capacitaciones</a></li>
+          <li><Link to='#' className="hover:text-blue-500">Manual</Link></li>
+          <li><Link to='#' className="hover:text-blue-500">Capacitaciones</Link></li>
           <li className="relative">
             <button onClick={() => toggleSubmenu("terminos")} className="flex items-center gap-1 hover:text-blue-500">
               Términos y Condiciones <ChevronDownIcon className="w-4 h-4" />
             </button>
             {submenuOpen === "terminos" && (
               <div className="absolute left-0 mt-2 bg-white text-black rounded-md shadow-md px-4 py-2 z-50">
-                <a href="#" className="block px-2 py-1 hover:text-blue-600">Pólizas</a>
+                <Link to='#' className="block px-2 py-1 hover:text-blue-600">Pólizas</Link>
               </div>
             )}
           </li>
@@ -80,8 +77,8 @@ export default function Navbar() {
       {/* Menú móvil */}
       {mobileMenuOpen && (
         <div className="px-4 pb-4 lg:hidden text-sm space-y-1">
-          <a href="#" className="block py-2 hover:text-blue-500">Manual</a>
-          <a href="#" className="block py-2 hover:text-blue-500">Capacitaciones</a>
+          <Link to='#' className="block py-2 hover:text-blue-500">Manual</Link>
+          <Link to='#' className="block py-2 hover:text-blue-500">Capacitaciones</Link>
 
           {/* Submenú Términos */}
           <div>
@@ -93,7 +90,7 @@ export default function Navbar() {
             </button>
             {submenuOpen === "terminos" && (
               <div className="pl-4">
-                <a href="#" className="block py-1 hover:text-blue-400">Pólizas</a>
+                <Link to='#' className="block py-1 hover:text-blue-400">Pólizas</Link>
               </div>
             )}
           </div>
