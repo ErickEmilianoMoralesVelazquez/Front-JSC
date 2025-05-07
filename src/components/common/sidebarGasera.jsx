@@ -52,9 +52,13 @@ export default function SidebarGasera() {
       >
         <div className="flex-1 flex flex-col justify-between h-full">
           <div>
-            <h2 className="text-2xl font-bold mb-8 text-white tracking-tight text-center">
-              Gasera
-            </h2>
+            <div className="flex justify-center w-full">
+              <img
+                src="/src/assets/images/image.png"
+                alt="Logo"
+                className="w-25 h-25 mb-8 mt-2 rounded-full"
+              />
+            </div>
             <nav className="flex flex-col gap-3">
               {menuItems.map((item, idx) => {
                 const isActive = location.pathname === item.path;
@@ -78,7 +82,11 @@ export default function SidebarGasera() {
           </div>
 
           <div className="flex flex-col gap-4 mt-10 relative">
-            <Link to={"https://web.whatsapp.com/send?phone=7771681311&text=%C2%A1Hola"}>
+            <Link
+              to={
+                "https://web.whatsapp.com/send?phone=7771681311&text=%C2%A1Hola"
+              }
+            >
               <div className="relative">
                 <button
                   type="button"
@@ -101,8 +109,8 @@ export default function SidebarGasera() {
 
                   {/* Contenido del popover */}
                   <div className="relative z-10 bg-white rounded-lg overflow-hidden">
-                    <div className="px-3 py-2 bg-gray-100 border-b border-gray-200">
-                      <h3 className="font-semibold text-gray-900">
+                    <div className="px-3 py-2 bg-black border-b border-black">
+                      <h3 className="font-semibold text-white">
                         Asesor Jorges
                       </h3>
                     </div>

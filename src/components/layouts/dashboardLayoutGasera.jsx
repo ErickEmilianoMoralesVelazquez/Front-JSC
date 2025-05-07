@@ -12,6 +12,7 @@ export default function DashboardLayout() {
           className="w-full h-26 bg-cover bg-center"
           style={{
             backgroundImage: "url('/src/assets/images/logos-nav.png')",
+            backgroundColor: "#3c3d3f",
           }}
         />
 
