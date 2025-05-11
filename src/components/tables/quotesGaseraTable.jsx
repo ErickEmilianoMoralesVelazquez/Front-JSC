@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import DataTable from "react-data-table-component";
-import { Eye, CheckCircle, XCircle } from "lucide-react";
+import { Eye, CheckCircle, XCircle, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import ModalDetails from "../modals/modalDetails";
 
 const initialQuotes = [
@@ -182,39 +183,102 @@ export default function QuotesGaseraTable() {
 
       {/* Modal de código de seguridad */}
       {showCodeDialog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="bg-white p-6 rounded-lg w-80 shadow-lg">
-            <h2 className="text-lg font-semibold mb-2">
+  <AnimatePresence>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+    >
+      <motion.div
+        initial={{ scale: 0.9, y: 20 }}
+        animate={{ scale: 1, y: 0 }}
+        exit={{ scale: 0.9, y: 20 }}
+        className="bg-white p-6 rounded-xl w-full max-w-md shadow-2xl border border-gray-100 relative"
+      >
+        {/* Header */}
+        <div className="flex justify-between items-start mb-4">
+          <div>
+            <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+              {currentAction === "Aceptada" ? (
+                <CheckCircle className="text-green-600" size={24} />
+              ) : (
+                <XCircle className="text-red-600" size={24} />
+              )}
               Confirmar {currentAction === "Aceptada" ? "aceptación" : "rechazo"}
-            </h2>
-            <p className="text-sm mb-4 text-gray-600">
-              Ingresa el código de seguridad para continuar.
+            </h3>
+            <p className="text-sm text-gray-500 mt-1">
+              ID de cotización: {quoteToUpdate?.id}
             </p>
-            <input
-              type="password"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm mb-2"
-              placeholder="Código de seguridad"
-              value={securityCode}
-              onChange={(e) => setSecurityCode(e.target.value)}
-            />
-            {errorCode && <p className="text-red-500 text-xs mb-2">{errorCode}</p>}
-            <div className="flex justify-end gap-2 mt-2">
-              <button
-                onClick={() => setShowCodeDialog(false)}
-                className="px-4 py-2 text-sm bg-gray-200 rounded-md hover:bg-gray-300"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={confirmCodeAndUpdate}
-                className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700"
-              >
-                Confirmar
-              </button>
-            </div>
           </div>
+          <button
+            onClick={() => setShowCodeDialog(false)}
+            className="p-1 rounded-full hover:bg-gray-100 transition-colors"
+            aria-label="Cerrar modal"
+          >
+            <X className="text-gray-500 hover:text-gray-700" size={20} />
+          </button>
         </div>
-      )}
+
+        {/* Contenido */}
+        <div className="space-y-4">
+          <motion.div 
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="space-y-2"
+          >
+            <p className="text-sm text-gray-600">
+              Ingresa el código de seguridad para {currentAction === "Aceptada" ? "aceptar" : "rechazar"} esta cotización.
+            </p>
+            <div className="relative">
+              <input
+                type="password"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                placeholder="Código de seguridad"
+                value={securityCode}
+                onChange={(e) => {
+                  setSecurityCode(e.target.value);
+                  setErrorCode("");
+                }}
+              />
+              {errorCode && (
+                <motion.p 
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-red-500 text-xs mt-1"
+                >
+                  {errorCode}
+                </motion.p>
+              )}
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Footer */}
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="mt-6 pt-4 border-t border-gray-100 flex justify-end gap-3"
+        >
+          <button
+            onClick={() => setShowCodeDialog(false)}
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={confirmCodeAndUpdate}
+            className={`px-4 py-2 text-sm font-medium text-white rounded-lg hover:opacity-90 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 ${
+              currentAction === "Aceptada" ? "bg-green-600" : "bg-red-600"
+            }`}
+          >
+            Confirmar {currentAction === "Aceptada" ? "aceptación" : "rechazo"}
+          </button>
+        </motion.div>
+      </motion.div>
+    </motion.div>
+  </AnimatePresence>
+)}
     </div>
   );
 }

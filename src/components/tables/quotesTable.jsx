@@ -1,189 +1,150 @@
-import React, { useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import DataTable from "react-data-table-component";
-import { Eye, Printer, Pencil } from "lucide-react";
-import { pdf } from "@react-pdf/renderer";
-import CotizacionPDF from "../cotizacionPDF";
-import ModalCreateQuote from "../modals/modalSaveQuote";
-
-const originalQuotes = [
-  {
-    id: "COT-2025-001",
-    cliente: "Gasera del Norte",
-    fecha: "10/04/2023",
-    total: "$12,450.00",
-    estatus: "Aceptada",
-    color: "green",
-  },
-  {
-    id: "COT-2025-002",
-    cliente: "Gasolinera Sureste",
-    fecha: "09/04/2023",
-    total: "$8,720.00",
-    estatus: "En proceso",
-    color: "yellow",
-  },
-  {
-    id: "COT-2025-003",
-    cliente: "Distribuidora Central",
-    fecha: "08/04/2023",
-    total: "$15,300.00",
-    estatus: "Rechazada",
-    color: "red",
-  },
-  {
-    id: "COT-2025-004",
-    cliente: "Gasera del Norte",
-    fecha: "10/04/2023",
-    total: "$12,450.00",
-    estatus: "Aceptada",
-    color: "green",
-  },
-];
-
-const badgeColor = {
-  green: "bg-green-100 text-green-700",
-  yellow: "bg-yellow-100 text-yellow-700",
-  red: "bg-red-100 text-red-700",
-};
+import ModalSaveQuote from "../modals/modalSaveQuote";
+import { FilePlus, Eye } from "lucide-react";
 
 export default function QuotesTable() {
-  const [modalOpen, setModalOpen] = useState(false);
-
+  const [quotes, setQuotes] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchText, setSearchText] = useState("");
-  const [selectedStatus, setSelectedStatus] = useState("");
-  const [selectedClient, setSelectedClient] = useState("");
 
-  const handleSaveQuote = (newQuote) => {
-    console.log("Nueva cotización:", newQuote);
+  useEffect(() => {
+    fetchQuotes();
+  }, []);
+
+  const fetchQuotes = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch("http://localhost:3001/quotations", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!res.ok) throw new Error("Error al obtener cotizaciones");
+
+      const data = await res.json();
+
+      const mapped = data.map((quote) => ({
+        id: quote.id,
+        clienteNombre: quote.Order?.User?.nombre || quote.Order?.User?.correo || `ID ${quote.pedido_id}`,
+        pedidoId: quote.pedido_id,
+        archivoUrl: quote.archivo_cotizacion || "", // URL firmada del archivo en S3
+        fecha: new Date(quote.fecha_creacion).toLocaleDateString("es-MX"),
+      }));
+
+      setQuotes(mapped);
+    } catch (error) {
+      console.error("Error al cargar cotizaciones:", error);
+    }
   };
 
-  const handleDownloadPDF = async (quote) => {
-    const blob = await pdf(<CotizacionPDF data={quote} />).toBlob();
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${quote.id}.pdf`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleSaveQuote = async (newQuote) => {
+    try {
+      const formData = new FormData();
+      if (newQuote.tipoArchivo === "pdf") {
+        formData.append("documento_pdf", newQuote.archivo);
+      } else if (newQuote.tipoArchivo === "xml") {
+        formData.append("documento_xml", newQuote.archivo);
+      } else {
+        alert("Tipo de archivo no válido.");
+        return;
+      }
+
+      formData.append("pedido_id", newQuote.pedidoId);
+      formData.append("monto", "0");
+      formData.append("descripcion", "Cotización generada por admin");
+
+      const token = localStorage.getItem("token");
+      const res = await fetch("http://localhost:3001/quotations", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (!res.ok) throw new Error("Error al subir cotización");
+
+      const { quotation } = await res.json();
+
+      const newEntry = {
+        id: quotation.id,
+        clienteNombre: newQuote.clienteNombre,
+        pedidoId: newQuote.pedidoId,
+        archivoUrl: quotation.documento_url,
+        fecha: new Date().toLocaleDateString("es-MX"),
+      };
+
+      setQuotes((prev) => [...prev, newEntry]);
+    } catch (error) {
+      console.error("Error al guardar cotización:", error);
+      alert("No se pudo guardar la cotización.");
+    }
   };
+
+  const filteredQuotes = useMemo(() => {
+    return quotes.filter((q) =>
+      q.pedidoId.toString().toLowerCase().includes(searchText.toLowerCase())
+    );
+  }, [searchText, quotes]);
 
   const columns = [
-    {
-      name: "ID Cotización",
-      selector: (row) => row.id,
-      sortable: true,
-    },
-    {
-      name: "Cliente",
-      selector: (row) => row.cliente,
-      sortable: true,
-    },
-    {
-      name: "Fecha",
-      selector: (row) => row.fecha,
-    },
-    {
-      name: "Total",
-      selector: (row) => row.total,
-    },
-    {
-      name: "Estatus",
-      cell: (row) => (
-        <span
-          className={`text-xs font-semibold px-3 py-1 rounded-full ${badgeColor[row.color]}`}
-        >
-          {row.estatus}
-        </span>
-      ),
-    },
+    { name: "ID Cotización", selector: (row) => row.id, sortable: true },
+    { name: "Cliente", selector: (row) => row.clienteNombre },
+    { name: "Pedido", selector: (row) => row.pedidoId },
+    { name: "Fecha", selector: (row) => row.fecha },
     {
       name: "Acciones",
       cell: (row) => (
-        <div className="flex items-center justify-start gap-3 h-full">
-          <Eye className="w-4 h-4 text-blue-500 cursor-pointer hover:scale-110 transition" />
-          <Printer
-            className="w-4 h-4 text-gray-600 cursor-pointer hover:scale-110 transition"
-            onClick={() => handleDownloadPDF(row)}
-          />
-          <Pencil className="w-4 h-4 text-yellow-500 cursor-pointer hover:scale-110 transition" />
-        </div>
+        <Eye
+          onClick={() => window.open(row.archivoUrl, "_blank")}
+          className="w-5 h-5 text-blue-600 hover:text-blue-800 cursor-pointer"
+          title="Ver cotización"
+        />
       ),
+      ignoreRowClick: true,
+      allowOverflow: true,
+      button: true,
     },
   ];
 
-  // 🔍 Filtrado combinado con useMemo
-  const filteredQuotes = useMemo(() => {
-    return originalQuotes.filter((quote) => {
-      const matchesSearch = quote.id.toLowerCase().includes(searchText.toLowerCase());
-      const matchesStatus = selectedStatus ? quote.estatus === selectedStatus : true;
-      const matchesClient = selectedClient ? quote.cliente === selectedClient : true;
-      return matchesSearch && matchesStatus && matchesClient;
-    });
-  }, [searchText, selectedStatus, selectedClient]);
-
   return (
-    <div className="bg-white p-6 rounded-xl shadow-md">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-3">
-        <h2 className="text-xl font-bold">Gestión de Cotizaciones</h2>
+    <div className="p-6 bg-white rounded-xl shadow-md">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold">Cotizaciones</h2>
         <button
-          onClick={() => setModalOpen(true)}
-          className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm flex items-center gap-2"
+          onClick={() => setIsModalOpen(true)}
+          className="bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2 rounded-md flex items-center gap-2"
         >
-          <span className="text-lg font-bold">+</span> Nueva Cotización
+          <FilePlus size={16} />
+          Nueva cotización
         </button>
       </div>
 
-      {/* Filtros */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-        <input
-          type="text"
-          placeholder="Buscar cotización..."
-          className="border border-gray-300 px-3 py-2 rounded-md text-sm w-full"
-          value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
-        />
-        <select
-          className="border border-gray-300 px-3 py-2 rounded-md text-sm w-full"
-          value={selectedStatus}
-          onChange={(e) => setSelectedStatus(e.target.value)}
-        >
-          <option value="">Filtrar por estatus</option>
-          <option value="Aceptada">Aceptada</option>
-          <option value="En proceso">En proceso</option>
-          <option value="Rechazada">Rechazada</option>
-        </select>
-        <select
-          className="border border-gray-300 px-3 py-2 rounded-md text-sm w-full"
-          value={selectedClient}
-          onChange={(e) => setSelectedClient(e.target.value)}
-        >
-          <option value="">Filtrar por cliente</option>
-          <option value="Gasera del Norte">Gasera del Norte</option>
-          <option value="Gasolinera Sureste">Gasolinera Sureste</option>
-          <option value="Distribuidora Central">Distribuidora Central</option>
-        </select>
-      </div>
+      <input
+        type="text"
+        placeholder="Buscar por ID de pedido..."
+        value={searchText}
+        onChange={(e) => setSearchText(e.target.value)}
+        className="mb-4 w-full border border-gray-300 px-3 py-2 rounded-md text-sm"
+      />
 
-      {/* Tabla */}
       <DataTable
         columns={columns}
         data={filteredQuotes}
         pagination
+        highlightOnHover
+        responsive
+        striped
         paginationComponentOptions={{
           rowsPerPageText: "Filas por página",
           rangeSeparatorText: "de",
         }}
-        highlightOnHover
-        responsive
-        striped
       />
 
-      {/* Modal de creación */}
-      <ModalCreateQuote
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
+      <ModalSaveQuote
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
         onSave={handleSaveQuote}
       />
     </div>

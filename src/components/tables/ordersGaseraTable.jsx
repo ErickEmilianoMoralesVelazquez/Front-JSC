@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import DataTable from "react-data-table-component";
 import DashboardGaseraCards from "../dashboard/dashboardGaseraCards";
 import ModalCreateOrder from "../modals/modalCreateOrder";
@@ -7,30 +7,7 @@ import ModalUploadImage from "../modals/modalUploadImage";
 import { Eye, Pencil, Trash2 } from "lucide-react";
 
 export default function OrdersGaseraTable() {
-  const [orders, setOrders] = useState([
-    {
-      id: "#12345",
-      fecha: "2023-10-04",
-      total: "12450.00",
-      estatus: "Completado",
-      color: "green",
-    },
-    {
-      id: "#12344",
-      fecha: "2023-09-04",
-      total: "8720.00",
-      estatus: "En proceso",
-      color: "yellow",
-    },
-    {
-      id: "#12343",
-      fecha: "2023-08-04",
-      total: "15300.00",
-      estatus: "Atrasado",
-      color: "red",
-    },
-  ]);
-
+  const [orders, setOrders] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -44,9 +21,81 @@ export default function OrdersGaseraTable() {
     red: "bg-red-100 text-red-700",
   };
 
-  const handleAddOrder = (newOrder) => {
-    setOrders((prev) => [...prev, newOrder]);
-    setIsOpen(false);
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  const fetchOrders = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch("http://localhost:3001/orders", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) throw new Error("Error al obtener pedidos");
+
+      const data = await res.json();
+
+      const mappedOrders = data.map((order) => ({
+        id: `#${order.id}`,
+        fecha: new Date(order.fecha_creacion).toISOString().split("T")[0],
+        total: "Por asignar",
+        estatus:
+          order.estado.charAt(0).toUpperCase() + order.estado.slice(1),
+        color:
+          order.estado === "completado"
+            ? "green"
+            : order.estado === "pendiente"
+            ? "yellow"
+            : "red",
+      }));
+
+      setOrders(mappedOrders);
+    } catch (err) {
+      console.error(err);
+      alert("No se pudieron cargar los pedidos.");
+    }
+  };
+
+  const handleAddOrder = async (pdfFile) => {
+    try {
+      const token = localStorage.getItem("token");
+      const formData = new FormData();
+      formData.append("pedido_pdf", pdfFile);
+
+      const res = await fetch("http://localhost:3001/orders", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        alert(errorData.message || "Error al crear pedido.");
+        return;
+      }
+
+      const { order } = await res.json();
+
+      const newOrder = {
+        id: `#${order.id}`,
+        fecha: new Date(order.fecha_creacion).toISOString().split("T")[0],
+        total: "Por asignar",
+        estatus:
+          order.estado.charAt(0).toUpperCase() + order.estado.slice(1),
+        color: "yellow",
+      };
+
+      setOrders((prev) => [...prev, newOrder]);
+      setIsOpen(false);
+    } catch (error) {
+      console.error("Error al subir pedido:", error);
+      alert("Ocurrió un error al crear el pedido.");
+    }
   };
 
   const handleEditOrder = (updatedOrder) => {
