@@ -1,7 +1,86 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 export default function ModalSaveQuote({ isOpen, onClose, onSave }) {
   const [fileName, setFileName] = useState("");
+  const [archivoTipo, setArchivoTipo] = useState("");
+  const [clientes, setClientes] = useState([]);
+  const [pedidos, setPedidos] = useState([]);
+  const [selectedClienteId, setSelectedClienteId] = useState("");
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchClientes();
+      setPedidos([]);
+      setSelectedClienteId("");
+      setFileName("");
+      setArchivoTipo("");
+    }
+  }, [isOpen]);
+
+  const fetchClientes = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch("http://localhost:3001/users/list", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) throw new Error("Error al obtener clientes");
+
+      const data = await res.json();
+      const soloClientes = data.filter((u) => u.rol === "cliente");
+      setClientes(soloClientes);
+    } catch (err) {
+      console.error("Error al obtener clientes:", err);
+      setClientes([]);
+    }
+  };
+
+  const fetchPedidosByCliente = async (clienteId) => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(
+        `http://localhost:3001/orders/by-client/${clienteId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const data = await res.json();
+      const pendientes = data.filter((p) => p.estado === "pendiente");
+      setPedidos(pendientes);
+    } catch (err) {
+      console.error("Error al obtener pedidos del cliente:", err);
+    }
+  };
+
+  const handleClienteChange = (e) => {
+    const clienteId = e.target.value;
+    setSelectedClienteId(clienteId);
+    if (clienteId) fetchPedidosByCliente(clienteId);
+    else setPedidos([]);
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const type = file.type;
+    if (type === "application/pdf") {
+      setArchivoTipo("pdf");
+    } else if (type === "application/xml" || type === "text/xml") {
+      setArchivoTipo("xml");
+    } else {
+      alert("Solo se permiten archivos PDF o XML");
+      e.target.value = "";
+      setArchivoTipo("");
+      return;
+    }
+
+    setFileName(file.name);
+  };
 
   if (!isOpen) return null;
 
@@ -26,10 +105,10 @@ export default function ModalSaveQuote({ isOpen, onClose, onSave }) {
               clienteId: form.cliente.value,
               pedidoId: form.pedido.value,
               archivo: form.archivo.files[0],
+              tipoArchivo: archivoTipo,
             };
             onSave(newQuote);
             setFileName("");
-            form.reset();
             onClose();
           }}
           className="space-y-4"
@@ -39,38 +118,46 @@ export default function ModalSaveQuote({ isOpen, onClose, onSave }) {
             <select
               name="cliente"
               required
+              value={selectedClienteId}
+              onChange={handleClienteChange}
               className="mt-1 w-full border border-gray-300 px-3 py-2 rounded-md text-sm"
             >
               <option value="">Selecciona un cliente</option>
-              <option value="1">Cliente 1</option>
-              <option value="2">Cliente 2</option>
-              <option value="3">Cliente 3</option>
+              {clientes.map((cliente) => (
+                <option key={cliente.id} value={cliente.id}>
+                  {cliente.nombre || cliente.correo || `ID ${cliente.id}`}
+                </option>
+              ))}
             </select>
           </div>
 
           <div>
-            <label className="block text-sm font-medium">Pedido</label>
+            <label className="block text-sm font-medium">Pedido pendiente</label>
             <select
               name="pedido"
               required
+              disabled={!selectedClienteId}
               className="mt-1 w-full border border-gray-300 px-3 py-2 rounded-md text-sm"
             >
               <option value="">Selecciona un pedido</option>
-              <option value="101">Pedido 101</option>
-              <option value="102">Pedido 102</option>
-              <option value="103">Pedido 103</option>
+              {pedidos.map((pedido) => (
+                <option key={pedido.id} value={pedido.id}>
+                  Pedido #{pedido.id}
+                </option>
+              ))}
             </select>
           </div>
 
           <div>
-            <label className="block text-sm font-medium">Archivo (solo PDF)</label>
+            <label className="block text-sm font-medium">
+              Archivo (PDF o XML)
+            </label>
             <input
               type="file"
               name="archivo"
-              accept=".pdf"
-              onChange={(e) =>
-                setFileName(e.target.files[0] ? e.target.files[0].name : "")
-              }
+              accept=".pdf,.xml"
+              required
+              onChange={handleFileChange}
               className="mt-1 block w-full text-sm text-gray-700 border border-gray-300 rounded-md cursor-pointer
               file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold
               file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200"

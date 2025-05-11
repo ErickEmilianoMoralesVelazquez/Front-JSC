@@ -1,97 +1,129 @@
-import React from "react";
-import DataTable from "react-data-table-component"; // ✅ Importación necesaria
-import DashboardCards from "../dashboard/dashboardCards";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import DataTable from "react-data-table-component";
 
 export default function OrdersTable() {
-  const orders = [
-    {
-      id: "#12345",
-      cliente: "Gasera del Norte",
-      fecha: "10/04/2023",
-      total: "$12,450.00",
-      estatus: "Completado",
-      color: "green",
-    },
-    {
-      id: "#12344",
-      cliente: "Gasolinera Sureste",
-      fecha: "09/04/2023",
-      total: "$8,720.00",
-      estatus: "En proceso",
-      color: "yellow",
-    },
-    {
-      id: "#12343",
-      cliente: "Distribuidora Central",
-      fecha: "08/04/2023",
-      total: "$15,300.00",
-      estatus: "Atrasado",
-      color: "red",
-    },
-  ];
+  const [orders, setOrders] = useState([]);
+  const [filteredOrders, setFilteredOrders] = useState([]);
+  const [estadoFilter, setEstadoFilter] = useState("");
+  const [fechaDesde, setFechaDesde] = useState("");
+  const [fechaHasta, setFechaHasta] = useState("");
 
-  const badgeColor = {
-    green: "bg-green-100 text-green-700",
-    yellow: "bg-yellow-100 text-yellow-700",
-    red: "bg-red-100 text-red-700",
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  const fetchOrders = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.get("http://localhost:3001/orders/", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setOrders(res.data);
+      setFilteredOrders(res.data);
+    } catch (error) {
+      console.error("Error al obtener pedidos:", error);
+    }
   };
 
+  // Filtro por estado y fechas
+  useEffect(() => {
+    let data = [...orders];
+
+    if (estadoFilter) {
+      data = data.filter((order) => order.estado === estadoFilter);
+    }
+
+    if (fechaDesde) {
+      data = data.filter(
+        (order) => new Date(order.fecha_creacion) >= new Date(fechaDesde)
+      );
+    }
+
+    if (fechaHasta) {
+      data = data.filter(
+        (order) => new Date(order.fecha_creacion) <= new Date(fechaHasta)
+      );
+    }
+
+    setFilteredOrders(data);
+  }, [estadoFilter, fechaDesde, fechaHasta, orders]);
+
+  const columns = [
+    { name: "ID", selector: (row) => row.id, sortable: true },
+    { name: "Usuario ID", selector: (row) => row.usuario_id },
+    {
+      name: "Fecha de creación",
+      selector: (row) =>
+        new Date(row.fecha_creacion).toLocaleDateString("es-MX"),
+    },
+    { name: "Estado", selector: (row) => row.estado },
+    {
+      name: "Fecha actualización",
+      selector: (row) =>
+        new Date(row.fecha_actualizacion).toLocaleDateString("es-MX"),
+    },
+    {
+      name: "Acciones",
+      cell: (row) => (
+        <button
+          onClick={() => {
+            const baseUrl = "http://localhost:3001";
+            const pdfPath = row.archivo_pdf.startsWith("/")
+              ? row.archivo_pdf
+              : `/${row.archivo_pdf}`;
+            window.open(`${baseUrl}${pdfPath}`, "_blank");
+          }}
+          className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+          title="Ver PDF"
+        >
+          Ver PDF
+        </button>
+      ),
+    },     
+  ];
+
   return (
-    <>
-      <DashboardCards />
-      <div className="bg-white p-6 rounded-xl shadow-md">
-        <h2 className="text-xl font-bold mb-6">Revisión de pedidos</h2>
+    <div className="p-6 bg-white rounded-xl shadow-md">
+      <h2 className="text-xl font-bold mb-4">Pedidos</h2>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <select
+          value={estadoFilter}
+          onChange={(e) => setEstadoFilter(e.target.value)}
+          className="border border-gray-300 px-3 py-2 rounded-md text-sm"
+        >
+          <option value="">Todos los estados</option>
+          <option value="pendiente">Pendiente</option>
+          <option value="completado">Completado</option>
+          <option value="rechazado">Rechazado</option>
+        </select>
 
         <input
-          type="text"
-          placeholder="Buscar pedido..."
-          className="mb-4 w-full border border-gray-300 px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          type="date"
+          value={fechaDesde}
+          onChange={(e) => setFechaDesde(e.target.value)}
+          className="border border-gray-300 px-3 py-2 rounded-md text-sm"
         />
 
-        <DataTable
-          columns={[
-            {
-              name: "ID Pedido",
-              selector: (row) => row.id,
-              sortable: true,
-            },
-            {
-              name: "Cliente",
-              selector: (row) => row.cliente,
-              sortable: true,
-            },
-            {
-              name: "Fecha",
-              selector: (row) => row.fecha,
-            },
-            {
-              name: "Total",
-              selector: (row) => row.total,
-            },
-            {
-              name: "Estatus",
-              cell: (row) => (
-                <span
-                  className={`text-xs font-semibold px-3 py-1 rounded-full ${
-                    badgeColor[row.color]
-                  }`}
-                >
-                  {row.estatus}
-                </span>
-              ),
-            },
-          ]}
-          data={orders}
-          pagination
-          paginationComponentOptions={{
-            rowsPerPageText: "Filas por página",
-            rangeSeparatorText: "de",
-          }}
-          highlightOnHover
-          responsive
-          striped
+        <input
+          type="date"
+          value={fechaHasta}
+          onChange={(e) => setFechaHasta(e.target.value)}
+          className="border border-gray-300 px-3 py-2 rounded-md text-sm"
         />
       </div>
-    </>
+
+      <DataTable
+        columns={columns}
+        data={filteredOrders}
+        pagination
+        highlightOnHover
+        striped
+        responsive
+      />
+    </div>
   );
 }

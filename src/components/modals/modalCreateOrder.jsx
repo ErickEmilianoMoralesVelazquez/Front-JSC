@@ -1,204 +1,178 @@
 import React, { useState } from "react";
-import { pdf } from "@react-pdf/renderer";
-import RequisitionPDF from "../requisitionPdf";
+import { motion, AnimatePresence } from "framer-motion";
+import { X, Upload, FileText, Trash2, Check } from "lucide-react";
 
 export default function ModalCreateOrder({ isOpen, onClose, onCreate }) {
-  const [form, setForm] = useState({
-    id: "",
-    fecha: "",
-    indicaciones: "",
-    items: [],
-  });
+  const [uploadedPdf, setUploadedPdf] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
 
-  const [item, setItem] = useState({ nombre: "", cantidad: "" });
-  const [errors, setErrors] = useState({});
-  const today = new Date().toISOString().split("T")[0];
-
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-    setErrors({ ...errors, [e.target.name]: "" });
+  const handleClose = () => {
+    setUploadedPdf(null);
+    const fileInput = document.getElementById("pdf-upload");
+    if (fileInput) fileInput.value = "";
+    onClose();
   };
 
-  const handleItemChange = (e) => {
-    setItem({ ...item, [e.target.name]: e.target.value });
-  };
-
-  const addItem = () => {
-    if (!item.nombre.trim() || !item.cantidad || isNaN(item.cantidad)) return;
-    setForm({
-      ...form,
-      items: [...form.items, { ...item }],
-    });
-    setItem({ nombre: "", cantidad: "" });
-  };
-
-  const removeItem = (index) => {
-    const newItems = form.items.filter((_, i) => i !== index);
-    setForm({ ...form, items: newItems });
-  };
-
-  const validate = () => {
-    const newErrors = {};
-    if (!form.id.trim()) newErrors.id = "El ID es requerido";
-    if (!form.fecha) {
-      newErrors.fecha = "La fecha es requerida";
-    } else if (form.fecha < today) {
-      newErrors.fecha = "La fecha no puede ser anterior a hoy";
+  const handleFileUpload = (e) => {
+    const file = e.target.files?.[0] || e.dataTransfer.files?.[0];
+    if (file && file.type === "application/pdf") {
+      setUploadedPdf(file);
+    } else {
+      alert("El archivo debe ser un PDF.");
     }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e) => {
+  const handleDragOver = (e) => {
     e.preventDefault();
-    if (validate()) {
-      onCreate({
-        ...form,
-        estatus: "Pendiente",
-        color: "yellow",
-      });
+    setIsDragging(true);
+  };
 
-      // ⬇️ Generar y descargar PDF al crear
-      const blob = await pdf(<RequisitionPDF form={form} />).toBlob();
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `pedido-${form.id}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+  const handleDragLeave = () => setIsDragging(false);
 
-      // Resetear el formulario y cerrar modal
-      setForm({ id: "", fecha: "", indicaciones: "", items: [] });
-      onClose();
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    handleFileUpload(e);
+  };
+
+  const handleRemovePdf = () => {
+    setUploadedPdf(null);
+    const fileInput = document.getElementById("pdf-upload");
+    if (fileInput) fileInput.value = "";
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!uploadedPdf) {
+      alert("Por favor selecciona un archivo PDF.");
+      return;
     }
+    onCreate(uploadedPdf);
+    handleClose();
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center">
-      <div className="bg-white p-6 rounded-lg w-full max-w-xl shadow-xl">
-        <h3 className="text-lg font-semibold mb-4">Nuevo pedido</h3>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* ID del pedido */}
-          <div>
-            <input
-              type="text"
-              name="id"
-              placeholder="ID del pedido"
-              value={form.id}
-              onChange={handleChange}
-              className={`w-full px-4 py-2 border ${
-                errors.id ? "border-red-500" : "border-gray-300"
-              } rounded-md text-sm`}
-              required
-            />
-            {errors.id && (
-              <p className="text-red-500 text-xs mt-1">{errors.id}</p>
-            )}
-          </div>
-
-          {/* Fecha */}
-          <div>
-            <input
-              type="date"
-              name="fecha"
-              value={form.fecha}
-              onChange={handleChange}
-              min={today}
-              className={`w-full px-4 py-2 border ${
-                errors.fecha ? "border-red-500" : "border-gray-300"
-              } rounded-md text-sm`}
-              required
-            />
-            {errors.fecha && (
-              <p className="text-red-500 text-xs mt-1">{errors.fecha}</p>
-            )}
-          </div>
-
-          {/* Indicaciones de facturación */}
-          <div>
-            <textarea
-              name="indicaciones"
-              placeholder="Indicaciones de facturación"
-              value={form.indicaciones}
-              onChange={handleChange}
-              rows={3}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md text-sm"
-            />
-          </div>
-
-          {/* Items */}
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">
-              Agregar items
-            </label>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                name="nombre"
-                placeholder="Nombre del item"
-                value={item.nombre}
-                onChange={handleItemChange}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm"
-              />
-              <input
-                type="number"
-                name="cantidad"
-                placeholder="Cantidad"
-                value={item.cantidad}
-                onChange={handleItemChange}
-                className="w-24 px-3 py-2 border border-gray-300 rounded-md text-sm"
-              />
-              <button
-                type="button"
-                onClick={addItem}
-                className="px-3 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700"
-              >
-                Agregar
-              </button>
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      >
+        <motion.div
+          initial={{ scale: 0.9, y: 20 }}
+          animate={{ scale: 1, y: 0 }}
+          exit={{ scale: 0.9, y: 20 }}
+          className="bg-white p-6 rounded-xl w-full max-w-md shadow-2xl border border-gray-100 relative"
+        >
+          {/* Header */}
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                <FileText className="text-red-600" size={20} />
+                Crear nuevo pedido
+              </h3>
+              <p className="text-sm text-gray-500 mt-1">
+                Sube un archivo PDF con los detalles del pedido.
+              </p>
             </div>
-            {form.items.length > 0 && (
-              <ul className="mt-2 space-y-1 text-sm text-gray-700">
-                {form.items.map((it, idx) => (
-                  <li
-                    key={idx}
-                    className="flex justify-between items-center bg-gray-100 px-3 py-1 rounded-md"
+            <button
+              onClick={handleClose}
+              className="p-1 rounded-full hover:bg-gray-100 transition-colors"
+              aria-label="Cerrar modal"
+            >
+              <X className="text-gray-500 hover:text-gray-700" size={20} />
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label className="text-sm font-medium text-gray-700 flex items-center gap-2 mb-2">
+                <Upload size={16} className="text-red-600" />
+                Archivo PDF
+              </label>
+
+              {!uploadedPdf ? (
+                <div
+                  className={`border-2 border-dashed rounded-xl p-6 text-center transition-colors ${
+                    isDragging ? "border-red-500 bg-red-50" : "border-gray-300"
+                  }`}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                >
+                  <FileText size={40} className="mx-auto text-gray-400 mb-3" />
+                  <p className="font-medium text-gray-700">
+                    Arrastra y suelta tu archivo PDF aquí
+                  </p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Solo se aceptan archivos PDF, máximo 10MB
+                  </p>
+                  <input
+                    type="file"
+                    accept="application/pdf"
+                    className="hidden"
+                    id="pdf-upload"
+                    onChange={handleFileUpload}
+                  />
+                  <label
+                    htmlFor="pdf-upload"
+                    className="inline-block mt-4 px-4 py-2 bg-black text-white text-sm font-medium rounded-lg hover:bg-gray-800 cursor-pointer transition-colors"
                   >
-                    <span>
-                      {it.nombre} - {it.cantidad}
-                    </span>
+                    Seleccionar archivo
+                  </label>
+                </div>
+              ) : (
+                <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-green-100 rounded-full text-green-600">
+                        <Check size={16} />
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900">
+                          {uploadedPdf.name}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {(uploadedPdf.size / 1024 / 1024).toFixed(2)} MB
+                        </p>
+                      </div>
+                    </div>
                     <button
                       type="button"
-                      onClick={() => removeItem(idx)}
-                      className="text-red-500 text-xs"
+                      onClick={handleRemovePdf}
+                      className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50 transition-colors"
+                      aria-label="Eliminar PDF"
                     >
-                      Eliminar
+                      <Trash2 size={16} />
                     </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
+                  </div>
+                </div>
+              )}
+            </div>
 
-          <div className="flex justify-end gap-3 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-sm bg-gray-200 rounded-md hover:bg-gray-300"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700"
-            >
-              Crear pedido
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+            {/* Footer */}
+            <div className="pt-4 border-t border-gray-100 flex justify-between items-center">
+              <button
+                type="button"
+                onClick={handleClose}
+                className="px-6 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                className="px-6 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 flex items-center gap-2"
+              >
+                <FileText size={16} />
+                Subir pedido
+              </button>
+            </div>
+          </form>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
   );
 }

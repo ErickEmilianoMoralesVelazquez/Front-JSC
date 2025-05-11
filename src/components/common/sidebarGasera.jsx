@@ -90,8 +90,8 @@ export default function SidebarGasera() {
               <div className="relative">
                 <button
                   type="button"
-                  onMouseEnter={() => setShowPopover(true)}
-                  onMouseLeave={() => setShowPopover(false)}
+                  onMouseEnter={() => window.innerWidth >= 768 && setShowPopover(true)}
+                  onMouseLeave={() => window.innerWidth >= 768 && setShowPopover(false)}
                   className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-red-500 to-red-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:scale-[1.02] transition"
                 >
                   <UserCircle size={18} />
@@ -100,7 +100,7 @@ export default function SidebarGasera() {
 
                 {/* Popover personalizado */}
                 <div
-                  className={`absolute left-full ml-4 top-1/2 -translate-y-1/2 w-64 bg-white text-gray-500 rounded-lg shadow-lg border border-gray-200 transition-all duration-200 ${
+                  className={`hidden md:block absolute left-full ml-4 top-1/2 -translate-y-1/2 w-64 bg-white text-gray-500 rounded-lg shadow-lg border border-gray-200 transition-all duration-200 ${
                     showPopover ? "opacity-100 visible" : "opacity-0 invisible"
                   }`}
                 >

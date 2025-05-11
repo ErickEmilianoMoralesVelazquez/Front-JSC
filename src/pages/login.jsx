@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { Warehouse, Eye, EyeClosed } from "lucide-react";
+import { Eye, EyeClosed } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 import "../../src/index.css";
 
 const MyLogin = () => {
@@ -11,15 +12,36 @@ const MyLogin = () => {
 
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
+    setErrorMsg("");
 
-    // Validación local temporal
-    if (email === "superadmin@demo.com" && password === "admin123") {
-      navigate("/dashboard/superadmin");
-    } else if (email === "gasera@demo.com" && password === "gasera123") {
-      navigate("/dashboard/gasera/orders");
-    } else {
+    try {
+      const res = await axios.post("http://localhost:3001/auth/login", {
+        correo: email,
+        contraseña: password,
+      });
+
+      const { token, user } = res.data;
+      const rol = user.rol;
+
+      // Guardar token
+      localStorage.setItem("token", token);
+
+      // Redirigir según rol
+      if (rol === "admin") {
+        navigate("/dashboard/superadmin");
+      } else if (rol === "cliente") {
+        navigate("/dashboard/gasera/orders");
+      } else {
+        setErrorMsg("Rol no reconocido.");
+        console.error("Rol no reconocido:", rol);
+      }
+    } catch (error) {
+      console.error(
+        "Error al iniciar sesión:",
+        error.response?.data || error.message
+      );
       setErrorMsg("Correo o contraseña incorrectos.");
     }
   };
@@ -52,7 +74,6 @@ const MyLogin = () => {
           <div className="flex justify-center items-center w-full">
             <div className="flex flex-col w-full max-w-md bg-white rounded-lg p-4 md:p-8 shadow-lg">
               <div className="flex md:hidden flex-row items-center justify-center text-black space-x-3 mb-8">
-                {/* <Warehouse className="w-8 h-8" /> */}
                 <h1 className="text-2xl text-center">Jorges Lubricantes</h1>
               </div>
 
@@ -68,6 +89,7 @@ const MyLogin = () => {
                   placeholder="Correo Electrónico"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  required
                   className="block w-full px-4 py-2 text-sm text-gray-900 bg-gray-100 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
                 />
 
@@ -78,6 +100,7 @@ const MyLogin = () => {
                     placeholder="Contraseña"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    required
                     className="block w-full px-4 py-2 text-sm text-gray-900 bg-gray-100 border border-gray-300 rounded-lg pr-10 focus:outline-none focus:ring-2 focus:ring-red-500"
                   />
                   <button
@@ -89,9 +112,7 @@ const MyLogin = () => {
                   </button>
                 </div>
 
-                {errorMsg && (
-                  <p className="text-sm text-red-600">{errorMsg}</p>
-                )}
+                {errorMsg && <p className="text-sm text-red-600">{errorMsg}</p>}
 
                 <button
                   type="submit"
