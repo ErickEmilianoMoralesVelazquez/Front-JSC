@@ -3,7 +3,6 @@ import DataTable from "react-data-table-component";
 import DashboardGaseraCards from "../dashboard/dashboardGaseraCards";
 import ModalCreateOrder from "../modals/modalCreateOrder";
 import ModalEditOrder from "../modals/modalEditOrder";
-import ModalUploadImage from "../modals/modalUploadImage";
 import { Eye, Pencil, Trash2 } from "lucide-react";
 
 export default function OrdersGaseraTable() {
@@ -45,7 +44,7 @@ export default function OrdersGaseraTable() {
         estatus:
           order.estado.charAt(0).toUpperCase() + order.estado.slice(1),
         color:
-          order.estado === "completado"
+          order.estado === "aceptado"
             ? "green"
             : order.estado === "pendiente"
             ? "yellow"
@@ -103,20 +102,6 @@ export default function OrdersGaseraTable() {
       prev.map((o) => (o.id === updatedOrder.id ? { ...updatedOrder } : o))
     );
     setIsEditOpen(false);
-  };
-
-  const handleUploadImage = () => {
-    const fakeId = `#IMG${Date.now().toString().slice(-4)}`;
-    const today = new Date().toISOString().split("T")[0];
-    const newOrder = {
-      id: fakeId,
-      fecha: today,
-      total: "Por asignar",
-      estatus: "Subido como imagen",
-      color: "yellow",
-    };
-    setOrders((prev) => [...prev, newOrder]);
-    setIsUploadImageOpen(false);
   };
 
   const handleDelete = () => {
@@ -195,12 +180,6 @@ export default function OrdersGaseraTable() {
             >
               + Crear pedido
             </button>
-            <button
-              onClick={() => setIsUploadImageOpen(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-lg font-medium transition"
-            >
-              Pedido por Imagen
-            </button>
           </div>
         </div>
 
@@ -237,11 +216,6 @@ export default function OrdersGaseraTable() {
         onClose={() => setIsEditOpen(false)}
         onSave={handleEditOrder}
         order={selectedOrder}
-      />
-      <ModalUploadImage
-        isOpen={isUploadImageOpen}
-        onClose={() => setIsUploadImageOpen(false)}
-        onUpload={handleUploadImage}
       />
 
       {/* Confirmación de eliminación */}

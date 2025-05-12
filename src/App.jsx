@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Landing from "./pages/landing";
+// import RequireAuth from "./components/auth/RequireAuth";
 
 // Superadmin
 import DashboardLayout from "./components/layouts/dashboardLayout";
@@ -15,7 +16,7 @@ import DashboardLayoutGasera from "./components/layouts/dashboardLayoutGasera";
 import OrdersGaseraTable from "./components/tables/ordersGaseraTable";
 import QuotesGaseraTable from "./components/tables/quotesGaseraTable";
 
-import MyLogin from "./pages/login";
+import MyLogin from "./pages/Login";
 import Cotizacion from "./components/Cotizacion";
 import React from "react";
 import "./App.css";

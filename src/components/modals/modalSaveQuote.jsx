@@ -1,4 +1,15 @@
 import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  X,
+  Trash,
+  FileText,
+  User,
+  ShoppingCart,
+  FileInput,
+  Save,
+  Check,
+} from "lucide-react";
 
 export default function ModalSaveQuote({ isOpen, onClose, onSave }) {
   const [fileName, setFileName] = useState("");
@@ -29,7 +40,9 @@ export default function ModalSaveQuote({ isOpen, onClose, onSave }) {
       if (!res.ok) throw new Error("Error al obtener clientes");
 
       const data = await res.json();
-      const soloClientes = data.filter((u) => u.rol === "cliente");
+      const soloClientes = data.filter(
+        (u) => u.rol === "cliente" && u.estado === "activo"
+      );
       setClientes(soloClientes);
     } catch (err) {
       console.error("Error al obtener clientes:", err);
@@ -85,107 +98,187 @@ export default function ModalSaveQuote({ isOpen, onClose, onSave }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-      <div className="bg-white w-full max-w-md rounded-lg shadow-lg p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-bold">Nueva Cotización</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 text-xl font-bold"
-          >
-            &times;
-          </button>
-        </div>
-
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            const form = e.target;
-            const newQuote = {
-              clienteId: form.cliente.value,
-              pedidoId: form.pedido.value,
-              archivo: form.archivo.files[0],
-              tipoArchivo: archivoTipo,
-            };
-            onSave(newQuote);
-            setFileName("");
-            onClose();
-          }}
-          className="space-y-4"
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center p-4"
         >
-          <div>
-            <label className="block text-sm font-medium">Cliente</label>
-            <select
-              name="cliente"
-              required
-              value={selectedClienteId}
-              onChange={handleClienteChange}
-              className="mt-1 w-full border border-gray-300 px-3 py-2 rounded-md text-sm"
-            >
-              <option value="">Selecciona un cliente</option>
-              {clientes.map((cliente) => (
-                <option key={cliente.id} value={cliente.id}>
-                  {cliente.nombre || cliente.correo || `ID ${cliente.id}`}
-                </option>
-              ))}
-            </select>
-          </div>
+          <motion.div
+            initial={{ scale: 0.95, y: 20 }}
+            animate={{ scale: 1, y: 0 }}
+            exit={{ scale: 0.95, y: 20 }}
+            className="bg-white rounded-xl w-full max-w-md shadow-2xl  relative"
+          >
+            {/* Header */}
+            <div className="bg-red-700 p-5 text-white rounded-t-xl">
+              <div className="flex justify-between items-start">
+                <div className="flex items-center gap-3">
+                  <FileText className="text-white" size={24} />
+                  <h2 className="text-xl font-bold">Nueva Cotización</h2>
+                </div>
+                <button
+                  onClick={onClose}
+                  className="p-1 rounded-full hover:bg-black/10 transition-colors"
+                  aria-label="Cerrar modal"
+                >
+                  <X className="text-white" size={20} />
+                </button>
+              </div>
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium">Pedido pendiente</label>
-            <select
-              name="pedido"
-              required
-              disabled={!selectedClienteId}
-              className="mt-1 w-full border border-gray-300 px-3 py-2 rounded-md text-sm"
+            {/* Contenido */}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const form = e.target;
+                const newQuote = {
+                  clienteId: form.cliente.value,
+                  pedidoId: form.pedido.value,
+                  archivo: form.archivo.files[0],
+                  tipoArchivo: archivoTipo,
+                };
+                onSave(newQuote);
+                setFileName("");
+                onClose();
+              }}
+              className="p-5 space-y-4"
             >
-              <option value="">Selecciona un pedido</option>
-              {pedidos.map((pedido) => (
-                <option key={pedido.id} value={pedido.id}>
-                  Pedido #{pedido.id}
-                </option>
-              ))}
-            </select>
-          </div>
+              {/* Cliente */}
+              <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                <div className="p-2 bg-red-100 rounded-full text-red-600">
+                  <User size={18} />
+                </div>
+                <div className="flex-1">
+                  <label className="text-xs font-medium text-gray-500">
+                    Cliente
+                  </label>
+                  <select
+                    name="cliente"
+                    required
+                    value={selectedClienteId}
+                    onChange={handleClienteChange}
+                    className="w-full px-3 py-1 border-b border-0 border-gray-300 bg-transparent focus:border-red-500 focus:outline-none text-sm font-medium text-gray-900"
+                  >
+                    <option value="">Selecciona un cliente</option>
+                    {clientes.map((cliente) => (
+                      <option key={cliente.id} value={cliente.id}>
+                        {cliente.nombre || cliente.correo || `ID ${cliente.id}`}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
 
-          <div>
-            <label className="block text-sm font-medium">
-              Archivo (PDF o XML)
-            </label>
-            <input
-              type="file"
-              name="archivo"
-              accept=".pdf,.xml"
-              required
-              onChange={handleFileChange}
-              className="mt-1 block w-full text-sm text-gray-700 border border-gray-300 rounded-md cursor-pointer
-              file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold
-              file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200"
-            />
-            {fileName && (
-              <p className="text-xs text-gray-500 mt-1">
-                Archivo cargado: <strong>{fileName}</strong>
-              </p>
-            )}
-          </div>
+              {/* Pedido */}
+              <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                <div className="p-2 bg-red-100 rounded-full text-red-600">
+                  <ShoppingCart size={18} />
+                </div>
+                <div className="flex-1">
+                  <label className="text-xs font-medium text-gray-500">
+                    Pedido pendiente
+                  </label>
+                  <select
+                    name="pedido"
+                    required
+                    disabled={!selectedClienteId}
+                    className="w-full px-3 py-1 border-b border-0 border-gray-300 bg-transparent focus:border-red-500 focus:outline-none text-sm font-medium text-gray-900"
+                  >
+                    <option value="">Selecciona un pedido</option>
+                    {pedidos.map((pedido) => (
+                      <option key={pedido.id} value={pedido.id}>
+                        Pedido #{pedido.id}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
 
-          <div className="flex justify-end pt-4 gap-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-sm border rounded-md hover:bg-gray-100"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-red-600 text-white text-sm rounded-md hover:bg-red-700"
-            >
-              Guardar
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+              {/* Archivo */}
+              {/* Archivo */}
+              <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                <div className="p-2 bg-red-100 rounded-full text-red-600">
+                  <FileInput size={18} />
+                </div>
+                <div className="flex-1">
+                  <label className="text-xs font-medium text-gray-500 mb-1 block">
+                    Archivo PDF o XML
+                  </label>
+
+                  {!fileName ? (
+                    <>
+                      <input
+                        type="file"
+                        name="archivo"
+                        accept=".pdf,.xml"
+                        required
+                        onChange={handleFileChange}
+                        className="hidden"
+                        id="file-upload"
+                      />
+                      <label
+                        htmlFor="file-upload"
+                        className="block w-full px-4 py-2 bg-gray-100 text-center text-sm text-gray-700 border border-dashed border-gray-300 rounded-md cursor-pointer hover:bg-gray-200 transition"
+                      >
+                        Seleccionar archivo
+                      </label>
+                    </>
+                  ) : (
+                    <div className="border border-gray-200 rounded-lg p-3 bg-white shadow-sm flex justify-between items-center">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-green-100 rounded-full text-green-600">
+                          <Check size={16} />
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-900">
+                            {fileName}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            Archivo listo para enviar
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFileName("");
+                          setArchivoTipo("");
+                          const input = document.getElementById("file-upload");
+                          if (input) input.value = "";
+                        }}
+                        className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50 transition-colors"
+                      >
+                        <Trash size={16} />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="pt-4 border-t border-gray-100 flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="px-6 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                >
+                  <Save size={16} />
+                  Guardar Cotización
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

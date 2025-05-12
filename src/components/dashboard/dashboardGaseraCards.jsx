@@ -1,14 +1,63 @@
-import { CalendarDays, FileText, DollarSign, Users } from 'lucide-react';
-import React from 'react';
-
-
-const cards = [
-  { label: 'Pedidos', value: 24, icon: <CalendarDays className="text-red-500" /> },
-  { label: 'Cotizaciones', value: 18, icon: <FileText className="text-yellow-400" /> },
-  { label: 'Pagos pendientes', value: 24, icon: <DollarSign className="text-red-600" /> },
-];
+import React, { useEffect, useState } from 'react';
+import { CalendarDays, FileText, DollarSign } from 'lucide-react';
 
 export default function DashboardGaseraCards() {
+  const [ordersCount, setOrdersCount] = useState(0);
+  const [quotesCount, setQuotesCount] = useState(0);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+
+    const fetchOrders = async () => {
+      try {
+        const res = await fetch('http://localhost:3001/orders', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const data = await res.json();
+        setOrdersCount(data.length || 0);
+      } catch (err) {
+        console.error('Error al obtener pedidos:', err);
+      }
+    };
+
+    const fetchQuotations = async () => {
+      try {
+        const res = await fetch('http://localhost:3001/quotations', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        const data = await res.json();
+        setQuotesCount(data.length || 0);
+      } catch (err) {
+        console.error('Error al obtener cotizaciones:', err);
+      }
+    };
+
+    fetchOrders();
+    fetchQuotations();
+  }, []);
+
+  const cards = [
+    {
+      label: 'Pedidos',
+      value: ordersCount,
+      icon: <CalendarDays className="text-red-500" />,
+    },
+    {
+      label: 'Cotizaciones',
+      value: quotesCount,
+      icon: <FileText className="text-yellow-400" />,
+    },
+    {
+      label: 'Pagos pendientes',
+      value: 24, // Temporal, hasta conectar al backend
+      icon: <DollarSign className="text-red-600" />,
+    },
+  ];
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
       {cards.map((card, idx) => (

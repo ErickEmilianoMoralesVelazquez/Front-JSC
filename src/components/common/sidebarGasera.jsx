@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   FileText,
   ClipboardList,
@@ -26,9 +26,32 @@ export default function SidebarGasera() {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [showPopover, setShowPopover] = useState(false);
+  const [userName, setUserName] = useState("");
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      fetch("http://localhost:3001/users/me", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data && data.nombre) {
+            setUserName(data.nombre);
+          }
+        })
+        .catch((err) => {
+          console.error("Error al obtener el usuario:", err);
+        });
+    }
+  }, []);
 
   const handleLogout = () => {
-    navigate("/");
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate("/", { replace: true });
   };
 
   return (
@@ -56,9 +79,14 @@ export default function SidebarGasera() {
               <img
                 src="/src/assets/images/image.png"
                 alt="Logo"
-                className="w-25 h-25 mb-8 mt-2 rounded-full"
+                className="w-25 h-25 mb-2 mt-2 rounded-full"
               />
             </div>
+            {userName && (
+              <p className="text-center text-sm text-white mb-6 font-semibold">
+                {userName}
+              </p>
+            )}
             <nav className="flex flex-col gap-3">
               {menuItems.map((item, idx) => {
                 const isActive = location.pathname === item.path;
@@ -82,16 +110,16 @@ export default function SidebarGasera() {
           </div>
 
           <div className="flex flex-col gap-4 mt-10 relative">
-            <Link
-              to={
-                "https://web.whatsapp.com/send?phone=7771681311&text=%C2%A1Hola"
-              }
-            >
+            <Link to="https://web.whatsapp.com/send?phone=7771681311&text=%C2%A1Hola">
               <div className="relative">
                 <button
                   type="button"
-                  onMouseEnter={() => window.innerWidth >= 768 && setShowPopover(true)}
-                  onMouseLeave={() => window.innerWidth >= 768 && setShowPopover(false)}
+                  onMouseEnter={() =>
+                    window.innerWidth >= 768 && setShowPopover(true)
+                  }
+                  onMouseLeave={() =>
+                    window.innerWidth >= 768 && setShowPopover(false)
+                  }
                   className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-red-500 to-red-700 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:scale-[1.02] transition"
                 >
                   <UserCircle size={18} />
@@ -104,10 +132,8 @@ export default function SidebarGasera() {
                     showPopover ? "opacity-100 visible" : "opacity-0 invisible"
                   }`}
                 >
-                  {/* Flecha del popover */}
                   <div className="absolute top-1/2 -left-2 -translate-y-1/2 w-4 h-4 bg-white transform rotate-45 border-l border-b border-gray-200"></div>
 
-                  {/* Contenido del popover */}
                   <div className="relative z-10 bg-white rounded-lg overflow-hidden">
                     <div className="px-3 py-2 bg-black border-b border-black">
                       <h3 className="font-semibold text-white">
@@ -124,7 +150,6 @@ export default function SidebarGasera() {
                 </div>
               </div>
             </Link>
-            {/* Botón contacto con popover */}
 
             {/* Botón cerrar sesión */}
             <button

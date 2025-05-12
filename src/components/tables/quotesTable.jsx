@@ -3,6 +3,12 @@ import DataTable from "react-data-table-component";
 import ModalSaveQuote from "../modals/modalSaveQuote";
 import { FilePlus, Eye } from "lucide-react";
 
+const badgeColors = {
+  pendiente: "bg-yellow-100 text-yellow-700",
+  aceptada: "bg-green-100 text-green-700",
+  rechazada: "bg-red-100 text-red-700",
+};
+
 export default function QuotesTable() {
   const [quotes, setQuotes] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -26,9 +32,10 @@ export default function QuotesTable() {
 
       const mapped = data.map((quote) => ({
         id: quote.id,
-        clienteNombre: quote.Order?.User?.nombre || quote.Order?.User?.correo || `ID ${quote.pedido_id}`,
+        clienteNombre: quote.Order?.usuario?.nombre || quote.Order?.usuario?.correo || `ID ${quote.pedido_id}`,
         pedidoId: quote.pedido_id,
-        archivoUrl: quote.archivo_cotizacion || "", // URL firmada del archivo en S3
+        estado: quote.estado,
+        archivoUrl: quote.archivo_cotizacion || "",
         fecha: new Date(quote.fecha_creacion).toLocaleDateString("es-MX"),
       }));
 
@@ -92,6 +99,18 @@ export default function QuotesTable() {
     { name: "ID Cotización", selector: (row) => row.id, sortable: true },
     { name: "Cliente", selector: (row) => row.clienteNombre },
     { name: "Pedido", selector: (row) => row.pedidoId },
+    {
+      name: "Estado",
+      cell: (row) => (
+        <span
+          className={`px-3 py-1 rounded-full text-xs font-semibold ${
+            badgeColors[row.estado] || "bg-gray-100 text-gray-700"
+          }`}
+        >
+          {row.estado}
+        </span>
+      ),
+    },
     { name: "Fecha", selector: (row) => row.fecha },
     {
       name: "Acciones",
@@ -103,8 +122,7 @@ export default function QuotesTable() {
         />
       ),
       ignoreRowClick: true,
-      allowOverflow: true,
-      button: true,
+      center: true,
     },
   ];
 
@@ -114,7 +132,7 @@ export default function QuotesTable() {
         <h2 className="text-xl font-bold">Cotizaciones</h2>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2 rounded-md flex items-center gap-2"
+          className="bg-red-600 hover:bg-green-700 text-white text-sm px-4 py-2 rounded-md flex items-center gap-2"
         >
           <FilePlus size={16} />
           Nueva cotización
