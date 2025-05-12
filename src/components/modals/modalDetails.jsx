@@ -1,14 +1,21 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, FileText, Calendar, DollarSign, ClipboardCheck, Info } from "lucide-react";
+import {
+  X,
+  FileText,
+  Calendar,
+  DollarSign,
+  ClipboardCheck,
+  Info,
+} from "lucide-react";
 
 export default function ModalDetails({ isOpen, onClose, data }) {
   if (!isOpen || !data) return null;
 
   const statusColor = {
-    "Pendiente": "bg-yellow-100 text-yellow-700",
-    "Aceptada": "bg-green-100 text-green-700",
-    "Rechazada": "bg-red-100 text-red-700"
+    pendiente: "bg-yellow-100 text-yellow-700",
+    aceptada: "bg-green-100 text-green-700",
+    rechazada: "bg-red-100 text-red-700",
   };
 
   return (
@@ -47,7 +54,7 @@ export default function ModalDetails({ isOpen, onClose, data }) {
 
           {/* Contenido */}
           <div className="space-y-4">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.1 }}
@@ -57,12 +64,14 @@ export default function ModalDetails({ isOpen, onClose, data }) {
                 <FileText size={18} />
               </div>
               <div>
-                <p className="text-xs font-medium text-gray-500">ID de cotización</p>
+                <p className="text-xs font-medium text-gray-500">
+                  ID de cotización
+                </p>
                 <p className="font-medium text-gray-900">{data.id}</p>
               </div>
             </motion.div>
 
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
@@ -73,26 +82,13 @@ export default function ModalDetails({ isOpen, onClose, data }) {
               </div>
               <div>
                 <p className="text-xs font-medium text-gray-500">Fecha</p>
-                <p className="font-medium text-gray-900">{data.fecha}</p>
+                <p className="font-medium text-gray-900">
+                  {data.fecha_creacion}
+                </p>
               </div>
             </motion.div>
 
-            <motion.div 
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-              className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg"
-            >
-              <div className="p-2 bg-red-100 rounded-full text-red-600">
-                <DollarSign size={18} />
-              </div>
-              <div>
-                <p className="text-xs font-medium text-gray-500">Total</p>
-                <p className="font-medium text-gray-900">{data.total}</p>
-              </div>
-            </motion.div>
-
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.4 }}
@@ -103,15 +99,19 @@ export default function ModalDetails({ isOpen, onClose, data }) {
               </div>
               <div>
                 <p className="text-xs font-medium text-gray-500">Estatus</p>
-                <p className={`font-medium px-3 py-1 rounded-full text-sm ${statusColor[data.estatus]}`}>
-                  {data.estatus}
+                <p
+                  className={`font-medium px-3 py-1 rounded-full text-sm ${
+                    statusColor[data.estado]
+                  }`}
+                >
+                  {data.estado}
                 </p>
               </div>
             </motion.div>
           </div>
 
           {/* Footer con acciones */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}

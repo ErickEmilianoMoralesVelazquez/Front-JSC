@@ -74,6 +74,35 @@ export default function UsersTable() {
     }
   };
 
+  const handleUpdateUser = async (updatedUser) => {
+    try {
+      const token = localStorage.getItem("token");
+  
+      const res = await axios.patch(
+        `http://localhost:3001/users/${updatedUser.id}`,
+        updatedUser,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+  
+      const userActualizado = res.data.user;
+  
+      // Actualiza la lista local
+      setUsers((prev) =>
+        prev.map((u) => (u.id === userActualizado.id ? userActualizado : u))
+      );
+  
+      setModalEditOpen(false);
+    } catch (error) {
+      console.error("Error al actualizar usuario:", error);
+      alert("No se pudo actualizar el usuario.");
+    }
+  };
+  
+
   const columns = [
     {
       name: "Nombre",
@@ -154,7 +183,7 @@ export default function UsersTable() {
         isOpen={modalEditOpen}
         onClose={() => setModalEditOpen(false)}
         user={selectedUser}
-        onSave={handleEdit}
+        onSave={handleUpdateUser}
       />
       <ModalViewUser
         isOpen={modalViewOpen}

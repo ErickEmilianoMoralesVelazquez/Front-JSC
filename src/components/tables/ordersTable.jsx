@@ -2,6 +2,13 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import DataTable from "react-data-table-component";
 
+const badgeColors = {
+  pendiente: "bg-yellow-100 text-yellow-700",
+  aceptado: "bg-green-100 text-green-700",
+  rechazado: "bg-red-100 text-red-700",
+  cotizado: "bg-green-100 text-green-700",
+};
+
 export default function OrdersTable() {
   const [orders, setOrders] = useState([]);
   const [filteredOrders, setFilteredOrders] = useState([]);
@@ -59,7 +66,18 @@ export default function OrdersTable() {
       selector: (row) =>
         new Date(row.fecha_creacion).toLocaleDateString("es-MX"),
     },
-    { name: "Estado", selector: (row) => row.estado },
+    {
+      name: "Estado",
+      cell: (row) => (
+        <span
+          className={`px-3 py-1 rounded-full text-xs font-semibold ${
+            badgeColors[row.estado] || "bg-gray-100 text-gray-700"
+          }`}
+        >
+          {row.estado.toUpperCase()}
+        </span>
+      ),
+    },
     {
       name: "Fecha actualización",
       selector: (row) =>
@@ -99,6 +117,7 @@ export default function OrdersTable() {
           <option value="pendiente">Pendiente</option>
           <option value="completado">Completado</option>
           <option value="rechazado">Rechazado</option>
+          <option value="cotizado">Cotizado</option>
         </select>
 
         <input
