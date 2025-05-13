@@ -60,7 +60,11 @@ export default function OrdersTable() {
 
   const columns = [
     { name: "ID", selector: (row) => row.id, sortable: true },
-    { name: "Usuario ID", selector: (row) => row.usuario_id },
+    { 
+      name: "Usuario",
+      selector: (row) => row.usuario?.nombre || row.nombre || `Usuario ${row.usuario_id}`,
+      sortable: true 
+    },
     {
       name: "Fecha de creación",
       selector: (row) =>

@@ -1,116 +1,249 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { X, Upload, FileText, Trash2, Check, User, ShoppingCart, DollarSign } from "lucide-react";
+import { toast } from "react-toastify";
 
-export default function ModalCreateInvoice({ isOpen, onClose, onSave }) {
+export default function ModalSaveInvoice({ isOpen, onClose, onSave }) {
+  const [uploadedFile, setUploadedFile] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
   const [fileName, setFileName] = useState("");
+  const [pedidos, setPedidos] = useState([]);
+  const [pagos, setPagos] = useState([]);
+  const [form, setForm] = useState({
+    pedidoId: "",
+    pagoId: "",
+  });
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchPedidos();
+      fetchPagos();
+    }
+  }, [isOpen]);
+
+  const fetchPedidos = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:3001/orders", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      
+      if (!response.ok) throw new Error("Error al cargar pedidos");
+      
+      const data = await response.json();
+      setPedidos(data);
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+      toast.error("Error al cargar los pedidos");
+    }
+  };
+
+  const fetchPagos = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:3001/payments", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      
+      if (!response.ok) throw new Error("Error al cargar pagos");
+      
+      const data = await response.json();
+      setPagos(data);
+    } catch (error) {
+      console.error("Error fetching payments:", error);
+      toast.error("Error al cargar los pagos");
+    }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!uploadedFile) {
+      toast.error("Debes seleccionar un archivo");
+      return;
+    }
+
+    const newInvoice = {
+      pedidoId: parseInt(form.pedidoId),
+      pagoId: parseInt(form.pagoId),
+      archivo: uploadedFile,
+    };
+
+    onSave(newInvoice);
+  };
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files?.[0] || e.dataTransfer.files?.[0];
+    if (file && (file.type === "application/pdf" || file.type === "text/xml")) {
+      setUploadedFile(file);
+      setFileName(file.name);
+    } else {
+      toast.error("El archivo debe ser PDF o XML");
+    }
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => setIsDragging(false);
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setIsDragging(false);
+    handleFileUpload(e);
+  };
+
+  const handleRemoveFile = () => {
+    setUploadedFile(null);
+    setFileName("");
+    const fileInput = document.getElementById("file-upload");
+    if (fileInput) fileInput.value = "";
+  };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-      <div className="bg-white w-full max-w-md rounded-lg shadow-lg p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-bold">Nueva Factura o Remisión</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 text-xl font-bold"
-          >
-            &times;
-          </button>
-        </div>
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <motion.div className="bg-white p-6 rounded-xl w-full max-w-md shadow-2xl">
+            <form onSubmit={handleSubmit}>
+              <div className="space-y-4">
+                <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                  <div className="p-2 bg-red-100 rounded-full text-red-600">
+                    <ShoppingCart size={18} />
+                  </div>
+                  <div className="flex-1">
+                    <label className="text-xs font-medium text-gray-500">Pedido</label>
+                    <select
+                      name="pedidoId"
+                      value={form.pedidoId}
+                      onChange={(e) => setForm({ ...form, pedidoId: e.target.value })}
+                      required
+                      className="w-full px-3 py-1 border-b border-gray-300 border-0 bg-transparent focus:border-red-500 focus:outline-none text-sm font-medium text-gray-900"
+                    >
+                      <option value="">Selecciona un pedido</option>
+                      {pedidos.map((pedido) => (
+                        <option key={pedido.id} value={pedido.id}>
+                          Pedido #{pedido.id}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
 
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            const form = e.target;
-            const newInvoice = {
-              documento: form.documento.value,
-              clienteId: form.cliente.value,
-              pedidoId: form.pedido.value,
-              archivo: form.archivo.files[0],
-            };
-            onSave(newInvoice);
-            setFileName("");
-            form.reset();
-            onClose();
-          }}
-          className="space-y-4"
-        >
-          <div>
-            <label className="block text-sm font-medium">Nombre del documento</label>
-            <input
-              type="text"
-              name="documento"
-              required
-              placeholder="Ej. FAC-2025-005.pdf"
-              className="mt-1 w-full border border-gray-300 px-3 py-2 rounded-md text-sm"
-            />
-          </div>
+                <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                  <div className="p-2 bg-red-100 rounded-full text-red-600">
+                    <DollarSign size={18} />
+                  </div>
+                  <div className="flex-1">
+                    <label className="text-xs font-medium text-gray-500">Pago</label>
+                    <select
+                      name="pagoId"
+                      value={form.pagoId}
+                      onChange={(e) => setForm({ ...form, pagoId: e.target.value })}
+                      required
+                      className="w-full px-3 py-1 border-b border-gray-300 border-0 bg-transparent focus:border-red-500 focus:outline-none text-sm font-medium text-gray-900"
+                    >
+                      <option value="">Selecciona un pago</option>
+                      {pagos.map((pago) => (
+                        <option key={pago.id} value={pago.id}>
+                          Pago #{pago.id}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                
+                {/* File upload section */}
+                <div>
+                  <label className="text-sm font-medium text-gray-700 flex items-center gap-2 mb-2">
+                    <Upload size={16} className="text-red-600" />
+                    Archivo (PDF/XML)
+                  </label>
 
-          <div>
-            <label className="block text-sm font-medium">Cliente</label>
-            <select
-              name="cliente"
-              required
-              className="mt-1 w-full border border-gray-300 px-3 py-2 rounded-md text-sm"
-            >
-              <option value="">Selecciona un cliente</option>
-              <option value="1">Cliente 1</option>
-              <option value="2">Cliente 2</option>
-              <option value="3">Cliente 3</option>
-            </select>
-          </div>
+                  {!uploadedFile ? (
+                    <div
+                      className={`border-2 border-dashed rounded-xl p-6 text-center transition-colors ${
+                        isDragging ? "border-red-500 bg-red-50" : "border-gray-300"
+                      }`}
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      onDrop={handleDrop}
+                    >
+                      <FileText size={40} className="mx-auto text-gray-400 mb-3" />
+                      <p className="font-medium text-gray-700">
+                        Arrastra y suelta tu archivo aquí
+                      </p>
+                      <p className="text-sm text-gray-500 mt-1">
+                        Se aceptan archivos PDF y XML, máximo 10MB
+                      </p>
+                      <input
+                        type="file"
+                        accept=".pdf,.xml"
+                        className="hidden"
+                        id="file-upload"
+                        onChange={handleFileUpload}
+                      />
+                      <label
+                        htmlFor="file-upload"
+                        className="inline-block mt-4 px-4 py-2 bg-black text-white text-sm font-medium rounded-lg hover:bg-gray-800 cursor-pointer transition-colors"
+                      >
+                        Seleccionar archivo
+                      </label>
+                    </div>
+                  ) : (
+                    <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-green-100 rounded-full text-green-600">
+                            <Check size={16} />
+                          </div>
+                          <div>
+                            <p className="font-medium text-gray-900">{fileName}</p>
+                            <p className="text-xs text-gray-500">
+                              {(uploadedFile.size / 1024 / 1024).toFixed(2)} MB
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleRemoveFile}
+                          className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50 transition-colors"
+                          aria-label="Eliminar archivo"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
 
-          <div>
-            <label className="block text-sm font-medium">Pedido relacionado</label>
-            <select
-              name="pedido"
-              required
-              className="mt-1 w-full border border-gray-300 px-3 py-2 rounded-md text-sm"
-            >
-              <option value="">Selecciona un pedido</option>
-              <option value="101">Pedido 101</option>
-              <option value="102">Pedido 102</option>
-              <option value="103">Pedido 103</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium">Archivo (PDF/XML)</label>
-            <input
-              type="file"
-              name="archivo"
-              accept=".pdf,.xml"
-              onChange={(e) =>
-                setFileName(e.target.files[0] ? e.target.files[0].name : "")
-              }
-              className="mt-1 block w-full text-sm text-gray-700 border border-gray-300 rounded-md cursor-pointer
-              file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold
-              file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200"
-            />
-            {fileName && (
-              <p className="text-xs text-gray-500 mt-1">
-                Archivo cargado: <strong>{fileName}</strong>
-              </p>
-            )}
-          </div>
-
-          <div className="flex justify-end pt-4 gap-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-sm border rounded-md hover:bg-gray-100"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-red-600 text-white text-sm rounded-md hover:bg-red-700"
-            >
-              Guardar
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+                <div className="mt-6 flex justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="px-4 py-2 text-gray-600 bg-gray-100 rounded-md"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 text-white bg-red-600 rounded-md"
+                  >
+                    Guardar
+                  </button>
+                </div>
+              </div>
+            </form>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

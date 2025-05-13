@@ -1,7 +1,8 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import DataTable from "react-data-table-component";
 import { Download, Printer, Pencil } from "lucide-react";
 import ModalCreateInvoice from "../modals/modalSaveInvoice";
+import { toast } from "react-toastify";
 
 const invoicesData = [
   {
@@ -46,14 +47,68 @@ const badgeColor = {
 
 export default function InvoicesTable() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [invoices, setInvoices] = useState(invoicesData);
-
+  const [invoices, setInvoices] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
   const [selectedClient, setSelectedClient] = useState("");
 
-  const handleSave = (newInvoice) => {
-    setInvoices((prev) => [...prev, newInvoice]);
+  useEffect(() => {
+    fetchInvoices();
+  }, []);
+
+  const fetchInvoices = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:3001/invoices", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      
+      if (!response.ok) throw new Error("Error al cargar facturas");
+      
+      const data = await response.json();
+      setInvoices(data);
+    } catch (error) {
+      console.error("Error fetching invoices:", error);
+      toast.error("Error al cargar las facturas");
+    }
+  };
+
+  const handleSave = async (newInvoice) => {
+    try {
+      const token = localStorage.getItem("token");
+      const formData = new FormData();
+      
+      formData.append("pedido_id", newInvoice.pedidoId);
+      formData.append("pago_id", newInvoice.pagoId);
+      
+      if (newInvoice.archivo.type === "application/pdf") {
+        formData.append("factura_pdf", newInvoice.archivo);
+      } else if (newInvoice.archivo.type === "text/xml") {
+        formData.append("factura_xml", newInvoice.archivo);
+      }
+
+      const response = await fetch("http://localhost:3001/invoices", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Error al crear la factura");
+      }
+
+      toast.success("Factura creada exitosamente");
+      fetchInvoices();
+      setIsModalOpen(false);
+    } catch (error) {
+      console.error("Error creating invoice:", error);
+      toast.error(error.message || "Error al crear la factura");
+    }
   };
 
   const filteredInvoices = useMemo(() => {
