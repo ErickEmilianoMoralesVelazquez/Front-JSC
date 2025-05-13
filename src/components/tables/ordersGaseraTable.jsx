@@ -4,13 +4,14 @@ import DashboardGaseraCards from "../dashboard/dashboardGaseraCards";
 import ModalCreateOrder from "../modals/modalCreateOrder";
 import ModalEditOrder from "../modals/modalEditOrder";
 import { Eye, Pencil, Trash2 } from "lucide-react";
-
+import { toast } from "react-toastify"; // ✅ NUEVO
+import "react-toastify/dist/ReactToastify.css";
+// URL https://prueba-jsc.s3.us-east-2.amazonaws.com/
 export default function OrdersGaseraTable() {
   const [orders, setOrders] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
-  const [isUploadImageOpen, setIsUploadImageOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
 
@@ -32,17 +33,17 @@ export default function OrdersGaseraTable() {
           Authorization: `Bearer ${token}`,
         },
       });
-
+  
       if (!res.ok) throw new Error("Error al obtener pedidos");
-
+  
       const data = await res.json();
-
+  
       const mappedOrders = data.map((order) => ({
         id: `#${order.id}`,
         fecha: new Date(order.fecha_creacion).toISOString().split("T")[0],
         total: "Por asignar",
-        estatus:
-          order.estado.charAt(0).toUpperCase() + order.estado.slice(1),
+        archivo_url: order.archivo_url,
+        estatus: order.estado.charAt(0).toUpperCase() + order.estado.slice(1),
         color:
           order.estado === "aceptado"
             ? "green"
@@ -50,20 +51,20 @@ export default function OrdersGaseraTable() {
             ? "yellow"
             : "red",
       }));
-
+  
       setOrders(mappedOrders);
     } catch (err) {
       console.error(err);
-      alert("No se pudieron cargar los pedidos.");
+      toast.error("No se pudieron cargar los pedidos.");
     }
   };
-
+  
   const handleAddOrder = async (pdfFile) => {
     try {
       const token = localStorage.getItem("token");
       const formData = new FormData();
       formData.append("pedido_pdf", pdfFile);
-
+  
       const res = await fetch("http://localhost:3001/orders", {
         method: "POST",
         headers: {
@@ -71,30 +72,36 @@ export default function OrdersGaseraTable() {
         },
         body: formData,
       });
-
+  
       if (!res.ok) {
         const errorData = await res.json();
-        alert(errorData.message || "Error al crear pedido.");
+        toast.error(errorData.message || "Error al crear pedido.");
         return;
       }
-
+  
       const { order } = await res.json();
-
+  
       const newOrder = {
         id: `#${order.id}`,
         fecha: new Date(order.fecha_creacion).toISOString().split("T")[0],
         total: "Por asignar",
-        estatus:
-          order.estado.charAt(0).toUpperCase() + order.estado.slice(1),
+        estatus: order.estado.charAt(0).toUpperCase() + order.estado.slice(1),
         color: "yellow",
       };
-
+  
       setOrders((prev) => [...prev, newOrder]);
       setIsOpen(false);
+      toast.success("Pedido creado correctamente.");
     } catch (error) {
       console.error("Error al subir pedido:", error);
-      alert("Ocurrió un error al crear el pedido.");
+      toast.error("Ocurrió un error al crear el pedido.");
     }
+  };
+  
+  const handleDelete = () => {
+    setOrders((prev) => prev.filter((o) => o.id !== confirmDeleteId));
+    setConfirmDeleteId(null);
+    toast.success("Pedido eliminado correctamente.");
   };
 
   const handleEditOrder = (updatedOrder) => {
@@ -102,11 +109,6 @@ export default function OrdersGaseraTable() {
       prev.map((o) => (o.id === updatedOrder.id ? { ...updatedOrder } : o))
     );
     setIsEditOpen(false);
-  };
-
-  const handleDelete = () => {
-    setOrders((prev) => prev.filter((o) => o.id !== confirmDeleteId));
-    setConfirmDeleteId(null);
   };
 
   const filteredOrders = useMemo(() => {
@@ -134,7 +136,9 @@ export default function OrdersGaseraTable() {
       name: "Estatus",
       cell: (row) => (
         <span
-          className={`text-xs font-semibold px-3 py-1 rounded-full ${badgeColor[row.color]}`}
+          className={`text-xs font-semibold px-3 py-1 rounded-full ${
+            badgeColor[row.color]
+          }`}
         >
           {row.estatus}
         </span>
@@ -146,8 +150,10 @@ export default function OrdersGaseraTable() {
         <div className="flex items-center justify-start h-full gap-3">
           <Eye
             className="w-4 h-4 text-blue-500 cursor-pointer hover:scale-110 transition"
-            title="Ver detalles"
+            title="Ver PDF"
+            onClick={() => window.open(row.archivo_url, "_blank")}
           />
+
           <Pencil
             className="w-4 h-4 text-yellow-500 cursor-pointer hover:scale-110 transition"
             title="Editar pedido"

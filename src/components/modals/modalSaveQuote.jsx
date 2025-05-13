@@ -14,6 +14,7 @@ import {
 export default function ModalSaveQuote({ isOpen, onClose, onSave }) {
   const [fileName, setFileName] = useState("");
   const [archivoTipo, setArchivoTipo] = useState("");
+  const [archivoSeleccionado, setArchivoSeleccionado] = useState(null);
   const [clientes, setClientes] = useState([]);
   const [pedidos, setPedidos] = useState([]);
   const [selectedClienteId, setSelectedClienteId] = useState("");
@@ -25,6 +26,7 @@ export default function ModalSaveQuote({ isOpen, onClose, onSave }) {
       setSelectedClienteId("");
       setFileName("");
       setArchivoTipo("");
+      setArchivoSeleccionado(null);
     }
   }, [isOpen]);
 
@@ -93,6 +95,7 @@ export default function ModalSaveQuote({ isOpen, onClose, onSave }) {
     }
 
     setFileName(file.name);
+    setArchivoSeleccionado(file);
   };
 
   if (!isOpen) return null;
@@ -137,11 +140,12 @@ export default function ModalSaveQuote({ isOpen, onClose, onSave }) {
                 const newQuote = {
                   clienteId: form.cliente.value,
                   pedidoId: form.pedido.value,
-                  archivo: form.archivo.files[0],
+                  archivo: archivoSeleccionado,
                   tipoArchivo: archivoTipo,
                 };
                 onSave(newQuote);
                 setFileName("");
+                setArchivoSeleccionado(null);
                 onClose();
               }}
               className="p-5 space-y-4"
@@ -198,7 +202,6 @@ export default function ModalSaveQuote({ isOpen, onClose, onSave }) {
               </div>
 
               {/* Archivo */}
-              {/* Archivo */}
               <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
                 <div className="p-2 bg-red-100 rounded-full text-red-600">
                   <FileInput size={18} />
@@ -212,7 +215,6 @@ export default function ModalSaveQuote({ isOpen, onClose, onSave }) {
                     <>
                       <input
                         type="file"
-                        name="archivo"
                         accept=".pdf,.xml"
                         required
                         onChange={handleFileChange}
@@ -246,6 +248,7 @@ export default function ModalSaveQuote({ isOpen, onClose, onSave }) {
                         onClick={() => {
                           setFileName("");
                           setArchivoTipo("");
+                          setArchivoSeleccionado(null);
                           const input = document.getElementById("file-upload");
                           if (input) input.value = "";
                         }}

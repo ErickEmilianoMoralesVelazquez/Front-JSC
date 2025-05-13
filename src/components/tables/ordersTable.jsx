@@ -87,20 +87,14 @@ export default function OrdersTable() {
       name: "Acciones",
       cell: (row) => (
         <button
-          onClick={() => {
-            const baseUrl = "http://localhost:3001";
-            const pdfPath = row.archivo_pdf.startsWith("/")
-              ? row.archivo_pdf
-              : `/${row.archivo_pdf}`;
-            window.open(`${baseUrl}${pdfPath}`, "_blank");
-          }}
-          className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+          onClick={() => window.open(row.archivo_url, "_blank")}
+          className="px-3 py-1 text-sm bg-red-600 text-white rounded-full hover:bg-blue-700 transition"
           title="Ver PDF"
         >
           Ver PDF
         </button>
       ),
-    },     
+    },
   ];
 
   return (
