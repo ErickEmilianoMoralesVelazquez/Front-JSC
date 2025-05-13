@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, User, Mail, Shield, Key, Eye, EyeOff, Save, Info } from "lucide-react";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 export default function ModalCreateUser({ isOpen, onClose, onSave }) {
   const [showPassword, setShowPassword] = useState(false);
@@ -51,7 +52,7 @@ export default function ModalCreateUser({ isOpen, onClose, onSave }) {
         "Error al crear usuario:",
         error.response?.data || error.message
       );
-      alert("Error al crear usuario");
+      toast.error(error.response?.data?.message || "Error al crear usuario");
     }
   };
 

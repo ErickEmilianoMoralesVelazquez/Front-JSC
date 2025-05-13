@@ -3,6 +3,7 @@ import axios from "axios";
 import DataTable from "react-data-table-component";
 import { Eye, Pencil, Plus, Trash2, AlertTriangle, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "react-toastify";
 import ModalCreateUser from "../modals/modalCreateUser";
 import ModalEditUser from "../modals/modalEditUser";
 import ModalViewUser from "../modals/modalViewUser";
@@ -38,24 +39,30 @@ export default function UsersTable() {
         },
       });
 
-      // Solo usuarios activos (estado === true)
       const activeUsers = res.data.filter((user) => user.estado === "activo");
       setUsers(activeUsers);
     } catch (error) {
       console.error("Error al obtener usuarios:", error);
+      toast.error("Error al cargar la lista de usuarios");
     }
   };
 
-  const handleCreate = (newUser) => {
-    setUsers((prev) => [...prev, newUser]);
-    setModalCreateOpen(false);
-  };
-
-  const handleEdit = (updatedUser) => {
-    setUsers((prev) =>
-      prev.map((u) => (u.id === updatedUser.id ? updatedUser : u))
-    );
-    setModalEditOpen(false);
+  const handleCreate = async (newUser) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.post("http://localhost:3001/users", newUser, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      
+      setUsers((prev) => [...prev, response.data.user]);
+      setModalCreateOpen(false);
+      toast.success("Usuario creado exitosamente");
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || "Error al crear el usuario";
+      toast.error(errorMessage);
+    }
   };
 
   const handleDelete = async () => {
@@ -68,16 +75,15 @@ export default function UsersTable() {
       });
       setUsers((prev) => prev.filter((u) => u.id !== confirmDeleteId));
       setConfirmDeleteId(null);
+      toast.success("Usuario eliminado exitosamente");
     } catch (error) {
-      console.error("Error al eliminar usuario:", error);
-      alert("No se pudo eliminar el usuario.");
+      toast.error(error.response?.data?.message || "Error al eliminar el usuario");
     }
   };
 
   const handleUpdateUser = async (updatedUser) => {
     try {
       const token = localStorage.getItem("token");
-  
       const res = await axios.patch(
         `http://localhost:3001/users/${updatedUser.id}`,
         updatedUser,
@@ -89,19 +95,23 @@ export default function UsersTable() {
       );
   
       const userActualizado = res.data.user;
-  
-      // Actualiza la lista local
       setUsers((prev) =>
         prev.map((u) => (u.id === userActualizado.id ? userActualizado : u))
       );
   
       setModalEditOpen(false);
+      toast.success("Usuario actualizado exitosamente");
     } catch (error) {
-      console.error("Error al actualizar usuario:", error);
-      alert("No se pudo actualizar el usuario.");
+      toast.error(error.response?.data?.message || "Error al actualizar el usuario");
     }
   };
-  
+
+  const handleEdit = (updatedUser) => {
+    setUsers((prev) =>
+      prev.map((u) => (u.id === updatedUser.id ? updatedUser : u))
+    );
+    setModalEditOpen(false);
+  };
 
   const columns = [
     {

@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import DataTable from "react-data-table-component";
 import ModalSaveQuote from "../modals/modalSaveQuote";
 import { FilePlus, Eye } from "lucide-react";
+import { toast } from "react-toastify";
 
 const badgeColors = {
   pendiente: "bg-yellow-100 text-yellow-700",
@@ -35,13 +36,14 @@ export default function QuotesTable() {
         clienteNombre: quote.Order?.usuario?.nombre || quote.Order?.usuario?.correo || `ID ${quote.pedido_id}`,
         pedidoId: quote.pedido_id,
         estado: quote.estado,
-        archivoUrl: quote.archivo_cotizacion || "",
+        archivo_url: quote.archivo_url || "",
         fecha: new Date(quote.fecha_creacion).toLocaleDateString("es-MX"),
       }));
 
       setQuotes(mapped);
     } catch (error) {
       console.error("Error al cargar cotizaciones:", error);
+      toast.error("Error al cargar las cotizaciones");
     }
   };
 
@@ -53,7 +55,7 @@ export default function QuotesTable() {
       } else if (newQuote.tipoArchivo === "xml") {
         formData.append("documento_xml", newQuote.archivo);
       } else {
-        alert("Tipo de archivo no válido.");
+        toast.error("Tipo de archivo no válido");
         return;
       }
 
@@ -83,9 +85,12 @@ export default function QuotesTable() {
       };
 
       setQuotes((prev) => [...prev, newEntry]);
+      fetchQuotes();
+      toast.success("Cotización guardada exitosamente");
+      setIsModalOpen(false);
     } catch (error) {
       console.error("Error al guardar cotización:", error);
-      alert("No se pudo guardar la cotización.");
+      toast.error("No se pudo guardar la cotización");
     }
   };
 
@@ -116,7 +121,13 @@ export default function QuotesTable() {
       name: "Acciones",
       cell: (row) => (
         <Eye
-          onClick={() => window.open(row.archivoUrl, "_blank")}
+          onClick={() => {
+            if (!row.archivo_url) {
+              toast.warning("No hay archivo disponible para visualizar");
+              return;
+            }
+            window.open(row.archivo_url, "_blank");
+          }}
           className="w-5 h-5 text-blue-600 hover:text-blue-800 cursor-pointer"
           title="Ver cotización"
         />
