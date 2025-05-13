@@ -14,6 +14,38 @@ export default function QuotesTable() {
   const [quotes, setQuotes] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchText, setSearchText] = useState("");
+  const [selectedClient, setSelectedClient] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("");
+
+  const columns = [
+    { name: "ID Cotización", selector: (row) => row.id, sortable: true },
+    { name: "Cliente", selector: (row) => row.clienteNombre },
+    { name: "Pedido", selector: (row) => row.pedidoId },
+    {
+      name: "Estado",
+      cell: (row) => (
+        <span
+          className={`px-3 py-1 rounded-full text-xs font-semibold ${
+            badgeColors[row.estado] || "bg-gray-100 text-gray-700"
+          }`}
+        >
+          {row.estado}
+        </span>
+      ),
+    },
+    { name: "Fecha", selector: (row) => row.fecha },
+    {
+      name: "Acciones",
+      cell: (row) => (
+        <div className="flex items-center gap-2">
+          <Eye
+            className="w-4 h-4 text-blue-500 cursor-pointer hover:scale-110 transition"
+            onClick={() => window.open(row.archivo_url, "_blank")}
+          />
+        </div>
+      ),
+    },
+  ];
 
   useEffect(() => {
     fetchQuotes();
@@ -95,47 +127,20 @@ export default function QuotesTable() {
   };
 
   const filteredQuotes = useMemo(() => {
-    return quotes.filter((q) =>
-      q.pedidoId.toString().toLowerCase().includes(searchText.toLowerCase())
-    );
-  }, [searchText, quotes]);
+    return quotes.filter((q) => {
+      const matchesSearch = q.pedidoId.toString().toLowerCase().includes(searchText.toLowerCase());
+      const matchesClient = selectedClient ? q.clienteNombre === selectedClient : true;
+      const matchesStatus = selectedStatus ? q.estado === selectedStatus : true;
 
-  const columns = [
-    { name: "ID Cotización", selector: (row) => row.id, sortable: true },
-    { name: "Cliente", selector: (row) => row.clienteNombre },
-    { name: "Pedido", selector: (row) => row.pedidoId },
-    {
-      name: "Estado",
-      cell: (row) => (
-        <span
-          className={`px-3 py-1 rounded-full text-xs font-semibold ${
-            badgeColors[row.estado] || "bg-gray-100 text-gray-700"
-          }`}
-        >
-          {row.estado}
-        </span>
-      ),
-    },
-    { name: "Fecha", selector: (row) => row.fecha },
-    {
-      name: "Acciones",
-      cell: (row) => (
-        <Eye
-          onClick={() => {
-            if (!row.archivo_url) {
-              toast.warning("No hay archivo disponible para visualizar");
-              return;
-            }
-            window.open(row.archivo_url, "_blank");
-          }}
-          className="w-5 h-5 text-blue-600 hover:text-blue-800 cursor-pointer"
-          title="Ver cotización"
-        />
-      ),
-      ignoreRowClick: true,
-      center: true,
-    },
-  ];
+      return matchesSearch && matchesClient && matchesStatus;
+    });
+  }, [searchText, selectedClient, selectedStatus, quotes]);
+
+  // Obtener lista única de clientes para el filtro
+  const uniqueClients = useMemo(() => {
+    const clients = [...new Set(quotes.map(q => q.clienteNombre))];
+    return clients.sort();
+  }, [quotes]);
 
   return (
     <div className="p-6 bg-white rounded-xl shadow-md">
@@ -150,13 +155,39 @@ export default function QuotesTable() {
         </button>
       </div>
 
-      <input
-        type="text"
-        placeholder="Buscar por ID de pedido..."
-        value={searchText}
-        onChange={(e) => setSearchText(e.target.value)}
-        className="mb-4 w-full border border-gray-300 px-3 py-2 rounded-md text-sm"
-      />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <input
+          type="text"
+          placeholder="Buscar por ID de pedido..."
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+          className="border border-gray-300 px-3 py-2 rounded-md text-sm"
+        />
+
+        <select
+          value={selectedClient}
+          onChange={(e) => setSelectedClient(e.target.value)}
+          className="border border-gray-300 px-3 py-2 rounded-md text-sm"
+        >
+          <option value="">Todos los clientes</option>
+          {uniqueClients.map((client) => (
+            <option key={client} value={client}>
+              {client}
+            </option>
+          ))}
+        </select>
+
+        <select
+          value={selectedStatus}
+          onChange={(e) => setSelectedStatus(e.target.value)}
+          className="border border-gray-300 px-3 py-2 rounded-md text-sm"
+        >
+          <option value="">Todos los estados</option>
+          <option value="pendiente">Pendiente</option>
+          <option value="aceptada">Aceptada</option>
+          <option value="rechazada">Rechazada</option>
+        </select>
+      </div>
 
       <DataTable
         columns={columns}
