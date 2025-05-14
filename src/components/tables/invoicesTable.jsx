@@ -4,45 +4,11 @@ import { Download, Printer, Pencil } from "lucide-react";
 import ModalCreateInvoice from "../modals/modalSaveInvoice";
 import { toast } from "react-toastify";
 
-const invoicesData = [
-  {
-    doc: "FAC-2025-01.pdf",
-    cliente: "Gasera del Norte",
-    fecha: "10/04/2023",
-    pedido: "PED-2025-001",
-    estatus: "Completado",
-    color: "green",
-  },
-  {
-    doc: "FAC-2025-02.pdf",
-    cliente: "Gasolinera Sureste",
-    fecha: "09/04/2023",
-    pedido: "PED-2025-002",
-    estatus: "En proceso",
-    color: "yellow",
-  },
-  {
-    doc: "FAC-2025-03.pdf",
-    cliente: "Distribuidora Central",
-    fecha: "08/04/2023",
-    pedido: "PED-2025-003",
-    estatus: "Atrasado",
-    color: "red",
-  },
-  {
-    doc: "FAC-2025-04.pdf",
-    cliente: "Gasera del Norte",
-    fecha: "10/04/2023",
-    pedido: "PED-2025-004",
-    estatus: "Completado",
-    color: "green",
-  },
-];
-
 const badgeColor = {
-  green: "bg-green-100 text-green-700",
-  yellow: "bg-yellow-100 text-yellow-700",
-  red: "bg-red-100 text-red-700",
+  pendiente: "bg-yellow-100 text-yellow-700",
+  emitida: "bg-blue-100 text-blue-700",
+  pagada: "bg-green-100 text-green-700",
+  cancelada: "bg-red-100 text-red-700"
 };
 
 export default function InvoicesTable() {
@@ -64,9 +30,9 @@ export default function InvoicesTable() {
           Authorization: `Bearer ${token}`,
         },
       });
-      
+
       if (!response.ok) throw new Error("Error al cargar facturas");
-      
+
       const data = await response.json();
       setInvoices(data);
     } catch (error) {
@@ -79,10 +45,10 @@ export default function InvoicesTable() {
     try {
       const token = localStorage.getItem("token");
       const formData = new FormData();
-      
+
       formData.append("pedido_id", newInvoice.pedidoId);
       formData.append("pago_id", newInvoice.pagoId);
-      
+
       if (newInvoice.archivo.type === "application/pdf") {
         formData.append("factura_pdf", newInvoice.archivo);
       } else if (newInvoice.archivo.type === "text/xml") {
@@ -114,8 +80,8 @@ export default function InvoicesTable() {
   const filteredInvoices = useMemo(() => {
     return invoices.filter((inv) => {
       const matchesSearch =
-        inv.doc.toLowerCase().includes(searchText.toLowerCase()) ||
-        inv.pedido.toLowerCase().includes(searchText.toLowerCase());
+        (inv.doc?.toLowerCase() || "").includes(searchText.toLowerCase()) ||
+        (inv.pedido?.toLowerCase() || "").includes(searchText.toLowerCase());
 
       const matchesStatus = selectedStatus
         ? inv.estatus === selectedStatus
@@ -150,26 +116,87 @@ export default function InvoicesTable() {
       selector: (row) => row.fecha,
     },
     {
-      name: "Pedido",
-      selector: (row) => row.pedido,
+      name: "Factura",
+      selector: (row) => row.url?.split('/').pop() || 'Sin archivo',
+      cell: (row) => (
+        <div className="group relative">
+          <span className="text-blue-600 underline cursor-pointer">
+            {row.url?.split('/').pop() || 'Sin archivo'}
+          </span>
+          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1 bg-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition pointer-events-none whitespace-nowrap">
+            Descargar factura
+          </div>
+        </div>
+      ),
+      sortable: true,
     },
     {
-      name: "Estatus",
+      name: "Pedido",
+      selector: (row) => `#${row.pedido_id}`,
+      sortable: true,
+    },
+    {
+      name: "Fecha Emisión",
+      selector: (row) => new Date(row.fecha_creacion).toLocaleDateString('es-MX', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      }),
+      sortable: true,
+    },
+    {
+      name: "Estado Factura",
       cell: (row) => (
-        <span
-          className={`text-xs font-semibold px-3 py-1 rounded-full ${badgeColor[row.color]}`}
-        >
-          {row.estatus}
+        <span className={`text-xs font-semibold px-3 py-1 rounded-full ${badgeColor[row.estado]}`}>
+          {row.estado.toUpperCase()}
         </span>
       ),
+      sortable: true,
+    },
+    {
+      name: "Estado Pago",
+      cell: (row) => (
+        <span className={`text-xs font-semibold px-3 py-1 rounded-full ${badgeColor[row.Payment?.estado || 'pendiente']}`}>
+          {(row.Payment?.estado || 'PENDIENTE').toUpperCase()}
+        </span>
+      ),
+      sortable: true,
     },
     {
       name: "Acciones",
       cell: (row) => (
         <div className="flex items-center gap-3">
-          <Download className="w-4 h-4 text-red-500 cursor-pointer hover:scale-110 transition" />
-          <Printer className="w-4 h-4 text-gray-600 cursor-pointer hover:scale-110 transition" />
-          <Pencil className="w-4 h-4 text-yellow-500 cursor-pointer hover:scale-110 transition" />
+          <div className="group relative">
+            <Download 
+              className="w-4 h-4 text-red-500 cursor-pointer hover:scale-110 transition"
+              onClick={() => handleDownload(row)}
+            />
+            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1 bg-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition pointer-events-none whitespace-nowrap">
+              Descargar factura
+            </div>
+          </div>
+
+          <div className="group relative">
+            <Printer 
+              className="w-4 h-4 text-gray-600 cursor-pointer hover:scale-110 transition"
+              onClick={() => handlePrint(row)}
+            />
+            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1 bg-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition pointer-events-none whitespace-nowrap">
+              Imprimir factura
+            </div>
+          </div>
+
+          {row.estado !== 'cancelada' && (
+            <div className="group relative">
+              <Pencil 
+                className="w-4 h-4 text-yellow-500 cursor-pointer hover:scale-110 transition"
+                onClick={() => handleEdit(row)}
+              />
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1 bg-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition pointer-events-none whitespace-nowrap">
+                Editar factura
+              </div>
+            </div>
+          )}
         </div>
       ),
     },
@@ -179,10 +206,10 @@ export default function InvoicesTable() {
     <div className="bg-white p-6 rounded-xl shadow-md">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-3">
-        <h2 className="text-xl font-bold">Gestión de Facturas y Remisiones</h2>
+        <h2 className="text-xl font-bold">Gestión de Facturas</h2>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm flex items-center gap-2"
+          className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm flex items-center gap-2 transition-colors"
         >
           <span className="text-lg font-bold">+</span> Nueva Factura
         </button>
@@ -192,34 +219,25 @@ export default function InvoicesTable() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <input
           type="text"
-          placeholder="Buscar documento o pedido..."
-          className="border border-gray-300 px-3 py-2 rounded-md text-sm w-full"
+          placeholder="Buscar por número de factura o pedido..."
+          className="border border-gray-300 px-3 py-2 rounded-lg text-sm w-full"
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
         />
         <select
-          className="border border-gray-300 px-3 py-2 rounded-md text-sm w-full"
+          className="border border-gray-300 px-3 py-2 rounded-lg text-sm w-full"
           value={selectedStatus}
           onChange={(e) => setSelectedStatus(e.target.value)}
         >
-          <option value="">Filtrar por estatus</option>
-          <option value="Completado">Completado</option>
-          <option value="En proceso">En proceso</option>
-          <option value="Atrasado">Atrasado</option>
-        </select>
-        <select
-          className="border border-gray-300 px-3 py-2 rounded-md text-sm w-full"
-          value={selectedClient}
-          onChange={(e) => setSelectedClient(e.target.value)}
-        >
-          <option value="">Filtrar por cliente</option>
-          <option value="Gasera del Norte">Gasera del Norte</option>
-          <option value="Gasolinera Sureste">Gasolinera Sureste</option>
-          <option value="Distribuidora Central">Distribuidora Central</option>
+          <option value="">Filtrar por estado de factura</option>
+          <option value="emitida">Emitida</option>
+          <option value="pendiente">Pendiente</option>
+          <option value="pagada">Pagada</option>
+          <option value="cancelada">Cancelada</option>
         </select>
       </div>
 
-      {/* Tabla con filtros activos */}
+      {/* Tabla */}
       <DataTable
         columns={columns}
         data={filteredInvoices}
@@ -228,6 +246,7 @@ export default function InvoicesTable() {
           rowsPerPageText: "Filas por página",
           rangeSeparatorText: "de",
         }}
+        noDataComponent="No hay facturas disponibles"
         highlightOnHover
         responsive
         striped
