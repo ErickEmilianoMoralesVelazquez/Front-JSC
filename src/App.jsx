@@ -18,7 +18,7 @@ import DashboardLayoutGasera from "./components/layouts/dashboardLayoutGasera";
 import OrdersGaseraTable from "./components/tables/ordersGaseraTable";
 import QuotesGaseraTable from "./components/tables/quotesGaseraTable";
 
-import MyLogin from "./pages/Login";
+import MyLogin from "./pages/login";
 import Cotizacion from "./components/Cotizacion";
 import "./App.css";
 
