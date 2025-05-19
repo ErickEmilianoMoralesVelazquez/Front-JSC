@@ -167,7 +167,12 @@ export default function QuotesGaseraTable() {
         }
       );
 
-      if (!res.ok) throw new Error("Error al asignar la fecha");
+      if (!res.ok) {
+        const errorData = await res.json();
+        setDateError(errorData.message);
+        toast.error(errorData.message);
+        return;
+      }
 
       setShowPaymentDialog(false);
       fetchQuotes();
@@ -225,10 +230,17 @@ export default function QuotesGaseraTable() {
             className="w-4 h-4 text-red-500 cursor-pointer"
             onClick={() => promptStatusChange(row.raw, "Rechazada")}
           />
-          <DollarSign
-            className="w-4 h-4 text-yellow-500 cursor-pointer"
-            onClick={() => openPaymentModal(row.id)}
-          />
+          {row.estatus === "Aceptada" ? (
+            <DollarSign
+              className="w-4 h-4 text-yellow-500 cursor-pointer"
+              onClick={() => openPaymentModal(row.id)}
+            />
+          ) : (
+            <DollarSign
+              className="w-4 h-4 text-gray-300"
+              title="Solo disponible para cotizaciones aceptadas"
+            />
+          )}
         </div>
       ),
     },
@@ -373,7 +385,7 @@ export default function QuotesGaseraTable() {
             >
               <div className="flex justify-between items-start mb-6">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-green-100 rounded-full text-green-600">
+                  <div className="p-2 bg-red-100 rounded-full text-red-600">
                     <Calendar size={20} />
                   </div>
                   <div>
@@ -400,18 +412,19 @@ export default function QuotesGaseraTable() {
                   animate={{ opacity: 1, y: 0 }}
                   className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg"
                 >
-                  <div className="p-2 bg-green-100 rounded-full text-green-600">
+                  <div className="p-2 bg-red-100 rounded-full text-red-600">
                     <Calendar size={18} />
                   </div>
                   <div className="flex-1">
                     <p className="text-xs font-medium text-gray-500 mb-1">
-                      Fecha de pago
+                      Fecha de pago (máximo 30 días a partir de hoy)
                     </p>
                     <input
                       type="date"
-                      className="w-full px-3 py-2 border-b rounded-lg border-gray-300 bg-transparent focus:border-green-500 focus:outline-none text-sm font-medium text-gray-900"
+                      className="w-full px-3 py-2 border-b rounded-lg border-gray-300 bg-transparent focus:border-red-500 focus:outline-none text-sm font-medium text-gray-900"
                       value={paymentDate}
                       min={new Date().toISOString().split("T")[0]}
+                      max={new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0]}
                       onChange={(e) => {
                         setPaymentDate(e.target.value);
                         setDateError("");
@@ -424,12 +437,15 @@ export default function QuotesGaseraTable() {
                   <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="flex items-start gap-2 text-sm text-red-500 bg-red-50 p-2 rounded-lg"
+                    className="flex items-start gap-2 text-sm text-red-500 bg-red-50 p-3 rounded-lg"
                   >
                     <AlertCircle size={16} className="flex-shrink-0 mt-0.5" />
-                    <span>{dateError}</span>
+                    <span className="font-medium">{dateError}</span>
                   </motion.div>
                 )}
+                <p className="text-xs text-gray-500 italic">
+                  Nota: La fecha de pago debe estar entre hoy y los próximos 30 días.
+                </p>
               </div>
 
               <motion.div
@@ -446,7 +462,7 @@ export default function QuotesGaseraTable() {
                 </button>
                 <button
                   onClick={handlePaymentDateSubmit}
-                  className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                  className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
                 >
                   <Check size={16} />
                   Confirmar fecha

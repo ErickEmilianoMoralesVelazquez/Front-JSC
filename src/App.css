@@ -80,3 +80,8 @@
 .animate-slide-out {
   animation: slideOut 0.3s ease-in forwards;
 }
+
+
+button {
+  cursor: pointer;
+}

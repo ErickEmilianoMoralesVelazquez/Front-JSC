@@ -8,7 +8,7 @@ const badgeColor = {
   pendiente: "bg-yellow-100 text-yellow-700",
   aceptado: "bg-green-100 text-green-700",
   rechazado: "bg-red-100 text-red-700",
-  cotizado: "bg-blue-100 text-blue-700"
+  cotizado: "bg-blue-100 text-blue-700",
 };
 
 export default function PaymentsTable() {
@@ -18,6 +18,30 @@ export default function PaymentsTable() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [montoAPagar, setMontoAPagar] = useState("");
+  const [users, setUsers] = useState([]);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const response = await fetch("http://localhost:3001/users/list", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) throw new Error("Error al obtener usuarios");
+
+        const data = await response.json();
+        setUsers(data);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+        toast.error("Error al cargar los usuarios");
+      }
+    };
+
+    fetchUsers();
+  }, []);
 
   useEffect(() => {
     fetchOrders();
@@ -26,14 +50,14 @@ export default function PaymentsTable() {
   const fetchOrders = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:3001/orders", {
+      const response = await fetch("http://localhost:3001/payments", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
       if (!response.ok) throw new Error("Error al obtener pedidos");
-      
+
       const data = await response.json();
       setOrders(data);
     } catch (error) {
@@ -50,14 +74,17 @@ export default function PaymentsTable() {
       }
 
       const token = localStorage.getItem("token");
-      const response = await fetch(`http://localhost:3001/payments/${selectedOrderId}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ monto: parseFloat(montoAPagar) }),
-      });
+      const response = await fetch(
+        `http://localhost:3001/payments/${selectedOrderId}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ monto: parseFloat(montoAPagar) }),
+        }
+      );
 
       if (!response.ok) {
         const error = await response.json();
@@ -77,31 +104,43 @@ export default function PaymentsTable() {
 
   const filteredOrders = useMemo(() => {
     return orders.filter((order) => {
-      const matchesSearch = order.id.toString().toLowerCase().includes(searchText.toLowerCase());
-      const matchesClient = selectedClient ? order.usuario?.nombre === selectedClient : true;
+      const matchesSearch = order.id
+        .toString()
+        .toLowerCase()
+        .includes(searchText.toLowerCase());
+      const matchesClient = selectedClient
+        ? order.usuario?.nombre === selectedClient
+        : true;
       return matchesSearch && matchesClient;
     });
   }, [searchText, selectedClient, orders]);
 
   const uniqueClients = useMemo(() => {
-    const clients = [...new Set(orders.map(order => order.usuario?.nombre).filter(Boolean))];
+    const clients = [
+      ...new Set(orders.map((order) => order.usuario?.nombre).filter(Boolean)),
+    ];
     return clients.sort();
   }, [orders]);
 
   const columns = [
     {
       name: "ID Pedido",
-      selector: (row) => row.id,
+      selector: (row) => row.Envio?.Order?.id || row.envio_id,
       sortable: true,
     },
     {
       name: "Cliente",
-      selector: (row) => row.usuario?.nombre || "Sin cliente",
+      selector: (row) => {
+        const userId = row.Envio?.Order?.usuario_id;
+        const user = users.find((u) => u.id === userId);
+        return user?.nombre || "Sin cliente";
+      },
       sortable: true,
     },
     {
       name: "Fecha",
-      selector: (row) => new Date(row.fecha_creacion).toLocaleDateString("es-MX"),
+      selector: (row) =>
+        new Date(row.fecha_creacion).toLocaleDateString("es-MX"),
       sortable: true,
     },
     {
@@ -120,15 +159,16 @@ export default function PaymentsTable() {
       name: "Acciones",
       cell: (row) => (
         <div className="flex items-center gap-3">
-          <Eye 
+          {/* <Eye
             className="w-4 h-4 text-blue-500 cursor-pointer hover:scale-110 transition"
             onClick={() => window.open(row.archivo_url, "_blank")}
             title="Ver pedido"
-          />
-          {row.estado === "cotizado" && (
+          /> */}
+          {row.estado === "pendiente" && (
             <button
               onClick={() => {
                 setSelectedOrderId(row.id);
+                setMontoAPagar(row.monto_total || ""); // solo si lo tienes
                 setIsModalOpen(true);
               }}
               className="flex items-center gap-1 px-2 py-1 text-sm bg-green-500 text-white rounded-full hover:bg-green-600 transition"
@@ -172,7 +212,7 @@ export default function PaymentsTable() {
 
       {/* Modal de Registro de Pago */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-xl w-96">
             <h3 className="text-lg font-bold mb-4">Registrar Pago</h3>
             <div className="mb-4">

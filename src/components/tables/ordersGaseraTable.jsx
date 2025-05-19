@@ -98,11 +98,38 @@ export default function OrdersGaseraTable() {
     }
   };
   
-  const handleDelete = () => {
-    setOrders((prev) => prev.filter((o) => o.id !== confirmDeleteId));
-    setConfirmDeleteId(null);
-    toast.success("Pedido eliminado correctamente.");
+  const handleDelete = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const orderId = confirmDeleteId.replace("#", "");
+  
+      const res = await fetch(`http://localhost:3001/orders/${orderId}/cancel`, {
+        method: "PATCH",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+  
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Error al cancelar el pedido.");
+      }
+  
+      toast.success("Pedido cancelado correctamente.");
+      setOrders((prev) =>
+        prev.map((o) =>
+          o.id === confirmDeleteId ? { ...o, estatus: "Cancelado", color: "red" } : o
+        )
+      );
+    } catch (error) {
+      console.error("Error al cancelar pedido:", error);
+      toast.error(error.message || "No se pudo cancelar el pedido.");
+    } finally {
+      setConfirmDeleteId(null);
+    }
   };
+  
 
   const handleEditOrder = (updatedOrder) => {
     setOrders((prev) =>
