@@ -8,7 +8,7 @@ const badgeColor = {
   pendiente: "bg-yellow-100 text-yellow-700",
   emitida: "bg-blue-100 text-blue-700",
   pagada: "bg-green-100 text-green-700",
-  cancelada: "bg-red-100 text-red-700"
+  cancelada: "bg-red-100 text-red-700",
 };
 
 export default function InvoicesTable() {
@@ -17,18 +17,35 @@ export default function InvoicesTable() {
   const [searchText, setSearchText] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
   const [selectedClient, setSelectedClient] = useState("");
+  const [users, setUsers] = useState([]);
 
   useEffect(() => {
     fetchInvoices();
+    fetchUsers();
   }, []);
+
+  const fetchUsers = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:3001/users/list", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!response.ok) throw new Error("Error al obtener usuarios");
+
+      const data = await response.json();
+      setUsers(data);
+    } catch (error) {
+      console.error("Error al obtener usuarios:", error);
+      toast.error("Error al cargar los usuarios");
+    }
+  };
 
   const fetchInvoices = async () => {
     try {
       const token = localStorage.getItem("token");
       const response = await fetch("http://localhost:3001/invoices", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       if (!response.ok) throw new Error("Error al cargar facturas");
@@ -57,9 +74,7 @@ export default function InvoicesTable() {
 
       const response = await fetch("http://localhost:3001/invoices", {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
         body: formData,
       });
 
@@ -76,6 +91,14 @@ export default function InvoicesTable() {
       toast.error(error.message || "Error al crear la factura");
     }
   };
+
+  const pedidosCotizados = useMemo(() => {
+    return invoices.map((inv) => inv.pedido_id);
+  }, [invoices]);
+
+  const pagosUtilizados = useMemo(() => {
+    return invoices.map((inv) => inv.pago_id).filter(Boolean);
+  }, [invoices]);
 
   const filteredInvoices = useMemo(() => {
     return invoices.filter((inv) => {
@@ -98,35 +121,55 @@ export default function InvoicesTable() {
   const columns = [
     {
       name: "Documento",
-      selector: (row) => row.doc,
+      selector: (row) =>
+        row.Order?.archivo_pdf?.split("/").pop() || "Sin documento",
       cell: (row) => (
-        <span className="text-blue-600 underline cursor-pointer">
-          {row.doc}
-        </span>
+        <button
+          onClick={() =>
+            row.Order?.archivo_url &&
+            window.open(row.Order.archivo_url, "_blank")
+          }
+          className="px-3 py-1 text-sm bg-red-600 text-white rounded-full hover:bg-red-700 transition flex items-center gap-2"
+          title="Ver PDF del pedido"
+          disabled={!row.Order?.archivo_url}
+        >
+          <span>Ver Pedido</span>
+        </button>
       ),
       sortable: true,
     },
     {
       name: "Cliente",
-      selector: (row) => row.cliente,
+      selector: (row) => {
+        const user = users.find((u) => u.id === row.Order?.usuario_id);
+        return (
+          user?.nombre ||
+          user?.correo ||
+          `Usuario ${row.Order?.usuario_id}` ||
+          "Sin cliente"
+        );
+      },
       sortable: true,
     },
     {
       name: "Fecha",
-      selector: (row) => row.fecha,
+      selector: (row) => new Date(row.fecha_subida).toLocaleDateString("es-MX"),
+      sortable: true,
     },
     {
       name: "Factura",
-      selector: (row) => row.url?.split('/').pop() || 'Sin archivo',
+      selector: (row) => row.url?.split("/").pop() || "Sin archivo",
       cell: (row) => (
-        <div className="group relative">
-          <span className="text-blue-600 underline cursor-pointer">
-            {row.url?.split('/').pop() || 'Sin archivo'}
-          </span>
-          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1 bg-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition pointer-events-none whitespace-nowrap">
-            Descargar factura
-          </div>
-        </div>
+        <button
+          onClick={() =>
+            row.archivo_url && window.open(row.archivo_url, "_blank")
+          }
+          className="px-3 py-1 text-sm bg-red-600 text-white rounded-full hover:bg-red-700 transition flex items-center gap-2"
+          title="Ver Factura"
+          disabled={!row.archivo_url}
+        >
+          <span>Ver Factura</span>
+        </button>
       ),
       sortable: true,
     },
@@ -137,17 +180,22 @@ export default function InvoicesTable() {
     },
     {
       name: "Fecha Emisión",
-      selector: (row) => new Date(row.fecha_creacion).toLocaleDateString('es-MX', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
-      }),
+      selector: (row) =>
+        new Date(row.fecha_creacion).toLocaleDateString("es-MX", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        }),
       sortable: true,
     },
     {
       name: "Estado Factura",
       cell: (row) => (
-        <span className={`text-xs font-semibold px-3 py-1 rounded-full ${badgeColor[row.estado]}`}>
+        <span
+          className={`text-xs font-semibold px-3 py-1 rounded-full ${
+            badgeColor[row.estado]
+          }`}
+        >
           {row.estado.toUpperCase()}
         </span>
       ),
@@ -156,8 +204,12 @@ export default function InvoicesTable() {
     {
       name: "Estado Pago",
       cell: (row) => (
-        <span className={`text-xs font-semibold px-3 py-1 rounded-full ${badgeColor[row.Payment?.estado || 'pendiente']}`}>
-          {(row.Payment?.estado || 'PENDIENTE').toUpperCase()}
+        <span
+          className={`text-xs font-semibold px-3 py-1 rounded-full ${
+            badgeColor[row.Payment?.estado || "pendiente"]
+          }`}
+        >
+          {(row.Payment?.estado || "PENDIENTE").toUpperCase()}
         </span>
       ),
       sortable: true,
@@ -166,37 +218,9 @@ export default function InvoicesTable() {
       name: "Acciones",
       cell: (row) => (
         <div className="flex items-center gap-3">
-          <div className="group relative">
-            <Download 
-              className="w-4 h-4 text-red-500 cursor-pointer hover:scale-110 transition"
-              onClick={() => handleDownload(row)}
-            />
-            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1 bg-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition pointer-events-none whitespace-nowrap">
-              Descargar factura
-            </div>
-          </div>
-
-          <div className="group relative">
-            <Printer 
-              className="w-4 h-4 text-gray-600 cursor-pointer hover:scale-110 transition"
-              onClick={() => handlePrint(row)}
-            />
-            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1 bg-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition pointer-events-none whitespace-nowrap">
-              Imprimir factura
-            </div>
-          </div>
-
-          {row.estado !== 'cancelada' && (
-            <div className="group relative">
-              <Pencil 
-                className="w-4 h-4 text-yellow-500 cursor-pointer hover:scale-110 transition"
-                onClick={() => handleEdit(row)}
-              />
-              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1 bg-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition pointer-events-none whitespace-nowrap">
-                Editar factura
-              </div>
-            </div>
-          )}
+          <Printer onClick={() => handlePrint(row)} />
+          <Download onClick={() => handleDownload(row)} />
+          <Pencil onClick={() => handleEdit(row)} />
         </div>
       ),
     },
@@ -204,8 +228,7 @@ export default function InvoicesTable() {
 
   return (
     <div className="bg-white p-6 rounded-xl shadow-md">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-3">
+      <div className="flex justify-between mb-6">
         <h2 className="text-xl font-bold">Gestión de Facturas</h2>
         <button
           onClick={() => setIsModalOpen(true)}
@@ -215,48 +238,21 @@ export default function InvoicesTable() {
         </button>
       </div>
 
-      {/* Filtros */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-        <input
-          type="text"
-          placeholder="Buscar por número de factura o pedido..."
-          className="border border-gray-300 px-3 py-2 rounded-lg text-sm w-full"
-          value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
-        />
-        <select
-          className="border border-gray-300 px-3 py-2 rounded-lg text-sm w-full"
-          value={selectedStatus}
-          onChange={(e) => setSelectedStatus(e.target.value)}
-        >
-          <option value="">Filtrar por estado de factura</option>
-          <option value="emitida">Emitida</option>
-          <option value="pendiente">Pendiente</option>
-          <option value="pagada">Pagada</option>
-          <option value="cancelada">Cancelada</option>
-        </select>
-      </div>
-
-      {/* Tabla */}
       <DataTable
         columns={columns}
         data={filteredInvoices}
         pagination
-        paginationComponentOptions={{
-          rowsPerPageText: "Filas por página",
-          rangeSeparatorText: "de",
-        }}
-        noDataComponent="No hay facturas disponibles"
         highlightOnHover
         responsive
         striped
       />
 
-      {/* Modal */}
       <ModalCreateInvoice
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSave={handleSave}
+        pedidosCotizados={pedidosCotizados}
+        pagosUtilizados={pagosUtilizados}
       />
     </div>
   );

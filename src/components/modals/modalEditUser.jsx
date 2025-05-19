@@ -9,7 +9,7 @@ export default function ModalEditUser({ isOpen, onClose, user, onSave }) {
     correo: "",
     rol: "cliente",
     fechaRegistro: "",
-    nueva_contraseña: "",
+    password: "",
   });
 
   useEffect(() => {
@@ -20,7 +20,7 @@ export default function ModalEditUser({ isOpen, onClose, user, onSave }) {
         correo: user.correo || "",
         rol: user.rol || "cliente",
         fechaRegistro: user.fechaRegistro || "",
-        nueva_contraseña: "",
+        password: "", // limpia
       });
     }
   }, [user]);
@@ -40,14 +40,13 @@ export default function ModalEditUser({ isOpen, onClose, user, onSave }) {
       rol: form.rol,
     };
 
-    if (form.nueva_contraseña) {
-      payload.nueva_contraseña = form.nueva_contraseña;
+    if (form.password.trim() !== "") {
+      payload.password = form.password;
     }
 
     onSave(payload);
     onClose();
   };
-  
 
   return (
     <AnimatePresence>
@@ -118,9 +117,9 @@ export default function ModalEditUser({ isOpen, onClose, user, onSave }) {
                 <div className="flex-1">
                   <p className="text-xs font-medium text-gray-500">Nueva contraseña</p>
                   <input
-                    name="nueva_contraseña"
+                    name="password"
                     type="password"
-                    value={form.nueva_contraseña}
+                    value={form.password}
                     onChange={handleChange}
                     placeholder="Opcional"
                     className="w-full px-3 py-1 border-b border-0 border-gray-300 bg-transparent focus:border-red-500 focus:outline-none text-sm font-medium text-gray-900"
@@ -158,7 +157,6 @@ export default function ModalEditUser({ isOpen, onClose, user, onSave }) {
                 </button>
                 <button
                   type="submit"
-                  
                   className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors"
                 >
                   Guardar cambios
@@ -171,3 +169,4 @@ export default function ModalEditUser({ isOpen, onClose, user, onSave }) {
     </AnimatePresence>
   );
 }
+
