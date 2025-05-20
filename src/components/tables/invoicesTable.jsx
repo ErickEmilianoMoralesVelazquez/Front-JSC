@@ -103,15 +103,15 @@ export default function InvoicesTable() {
   const filteredInvoices = useMemo(() => {
     return invoices.filter((inv) => {
       const matchesSearch =
-        (inv.doc?.toLowerCase() || "").includes(searchText.toLowerCase()) ||
-        (inv.pedido?.toLowerCase() || "").includes(searchText.toLowerCase());
+        (inv.Order?.archivo_pdf?.toLowerCase() || "").includes(searchText.toLowerCase()) ||
+        String(inv.pedido_id).includes(searchText);
 
       const matchesStatus = selectedStatus
-        ? inv.estatus === selectedStatus
+        ? inv.estado === selectedStatus
         : true;
 
       const matchesClient = selectedClient
-        ? inv.cliente === selectedClient
+        ? inv.Order?.usuario_id === parseInt(selectedClient)
         : true;
 
       return matchesSearch && matchesStatus && matchesClient;
@@ -214,17 +214,21 @@ export default function InvoicesTable() {
       ),
       sortable: true,
     },
-    {
-      name: "Acciones",
-      cell: (row) => (
-        <div className="flex items-center gap-3">
-          <Printer onClick={() => handlePrint(row)} />
-          <Download onClick={() => handleDownload(row)} />
-          <Pencil onClick={() => handleEdit(row)} />
-        </div>
-      ),
-    },
+    // {
+    //   name: "Acciones",
+    //   cell: (row) => (
+    //     <div className="flex items-center gap-3">
+    //       <Printer onClick={() => handlePrint(row)} />
+    //       <Download onClick={() => handleDownload(row)} />
+    //       <Pencil onClick={() => handleEdit(row)} />
+    //     </div>
+    //   ),
+    // },
   ];
+
+  const filteredUsers = useMemo(() => {
+    return users.filter(user => user.rol === 'cliente');
+  }, [users]);
 
   return (
     <div className="bg-white p-6 rounded-xl shadow-md">
@@ -236,6 +240,41 @@ export default function InvoicesTable() {
         >
           <span className="text-lg font-bold">+</span> Nueva Factura
         </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <input
+          type="text"
+          placeholder="Buscar por documento o pedido..."
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+          className="border border-gray-300 px-3 py-2 rounded-md text-sm w-full"
+        />
+
+        <select
+          value={selectedStatus}
+          onChange={(e) => setSelectedStatus(e.target.value)}
+          className="border border-gray-300 px-3 py-2 rounded-md text-sm w-full"
+        >
+          <option value="">Todos los estados</option>
+          <option value="pendiente">Pendiente</option>
+          <option value="emitida">Emitida</option>
+          <option value="pagada">Pagada</option>
+          <option value="cancelada">Cancelada</option>
+        </select>
+
+        <select
+          value={selectedClient}
+          onChange={(e) => setSelectedClient(e.target.value)}
+          className="border border-gray-300 px-3 py-2 rounded-md text-sm w-full"
+        >
+          <option value="">Todos los clientes</option>
+          {filteredUsers.map((user) => (
+            <option key={user.id} value={user.id}>
+              {user.nombre || user.correo || `Usuario ${user.id}`}
+            </option>
+          ))}
+        </select>
       </div>
 
       <DataTable
