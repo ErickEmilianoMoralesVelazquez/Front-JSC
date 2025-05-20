@@ -34,16 +34,20 @@ JORGES es una plataforma web diseñada para la gestión integral de pedidos, cot
 1. Clonar el repositorio
 
 ```bash
-git clone [url-del-repositorio]
+git clone https://github.com/ErickEmilianoMoralesVelazquez/FrontJSC.git
 ```
 
 2. Instalar dependencias
 
+```bash
    npm install
+```
 
 3. Iniciar el servidor de desarrollo
 
+```bash
    npm run dev
+```
 
 ## Scripts Disponibles
 
