@@ -169,4 +169,3 @@ export default function ModalEditUser({ isOpen, onClose, user, onSave }) {
     </AnimatePresence>
   );
 }
-
