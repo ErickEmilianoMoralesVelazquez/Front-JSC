@@ -4,9 +4,8 @@ import DashboardGaseraCards from "../dashboard/dashboardGaseraCards";
 import ModalCreateOrder from "../modals/modalCreateOrder";
 import ModalEditOrder from "../modals/modalEditOrder";
 import { Eye, Pencil, Trash2 } from "lucide-react";
-import { toast } from "react-toastify"; // ✅ NUEVO
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-// URL https://prueba-jsc.s3.us-east-2.amazonaws.com/
 export default function OrdersGaseraTable() {
   const [orders, setOrders] = useState([]);
   const [searchText, setSearchText] = useState("");
@@ -20,7 +19,6 @@ export default function OrdersGaseraTable() {
     yellow: "bg-yellow-100 text-yellow-700",
     red: "bg-red-100 text-red-700",
   };
-
   useEffect(() => {
     fetchOrders();
   }, []);
@@ -28,7 +26,7 @@ export default function OrdersGaseraTable() {
   const fetchOrders = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:3001/orders", {
+      const res = await fetch(`${import.meta.env.VITE_URL_BACKEND}orders`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -65,7 +63,7 @@ export default function OrdersGaseraTable() {
       const formData = new FormData();
       formData.append("pedido_pdf", pdfFile);
   
-      const res = await fetch("http://localhost:3001/orders", {
+      const res = await fetch(`${import.meta.env.VITE_URL_BACKEND}orders`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -103,7 +101,7 @@ export default function OrdersGaseraTable() {
       const token = localStorage.getItem("token");
       const orderId = confirmDeleteId.replace("#", "");
   
-      const res = await fetch(`http://localhost:3001/orders/${orderId}/cancel`, {
+      const res = await fetch(`${import.meta.env.VITE_URL_BACKEND}orders/${orderId}/cancel`, {
         method: "PATCH",
         headers: {
           Authorization: `Bearer ${token}`,

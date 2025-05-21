@@ -19,8 +19,11 @@ export default function ModalSaveInvoice({
   pagosUtilizados = []
 }) {
   const [uploadedFile, setUploadedFile] = useState(null);
+  const [uploadedXmlFile, setUploadedXmlFile] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [isDraggingXml, setIsDraggingXml] = useState(false);
   const [fileName, setFileName] = useState("");
+  const [xmlFileName, setXmlFileName] = useState("");
   const [pedidos, setPedidos] = useState([]);
   const [pagos, setPagos] = useState([]);
   const [form, setForm] = useState({
@@ -38,7 +41,7 @@ export default function ModalSaveInvoice({
   const fetchPedidos = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:3001/orders", {
+      const response = await fetch(`${import.meta.env.VITE_URL_BACKEND}orders`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -55,7 +58,7 @@ export default function ModalSaveInvoice({
   const fetchPagos = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:3001/payments", {
+      const response = await fetch(`${import.meta.env.VITE_URL_BACKEND}payments`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 
@@ -79,48 +82,61 @@ export default function ModalSaveInvoice({
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!uploadedFile) {
-      toast.error("Debes seleccionar un archivo");
+    if (!uploadedFile || !uploadedXmlFile) {
+      toast.error("Debes seleccionar ambos archivos (PDF y XML)");
       return;
     }
 
     const newInvoice = {
       pedidoId: parseInt(form.pedidoId),
       pagoId: parseInt(form.pagoId),
-      archivo: uploadedFile
+      archivo_pdf: uploadedFile,
+      archivo_xml: uploadedXmlFile
     };
 
     onSave(newInvoice);
   };
 
-  const handleFileUpload = (e) => {
+  const handleFileUpload = (e, fileType) => {
     const file = e.target.files?.[0] || e.dataTransfer.files?.[0];
-    if (file && (file.type === "application/pdf" || file.type === "text/xml")) {
+    if (fileType === 'pdf' && file?.type === "application/pdf") {
       setUploadedFile(file);
       setFileName(file.name);
+    } else if (fileType === 'xml' && file?.type === "text/xml") {
+      setUploadedXmlFile(file);
+      setXmlFileName(file.name);
     } else {
-      toast.error("El archivo debe ser PDF o XML");
+      toast.error(fileType === 'pdf' ? "El archivo debe ser PDF" : "El archivo debe ser XML");
     }
   };
 
-  const handleDragOver = (e) => {
+  const handleDragOver = (e, type) => {
     e.preventDefault();
-    setIsDragging(true);
+    type === 'pdf' ? setIsDragging(true) : setIsDraggingXml(true);
   };
 
-  const handleDragLeave = () => setIsDragging(false);
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    setIsDragging(false);
-    handleFileUpload(e);
+  const handleDragLeave = (type) => {
+    type === 'pdf' ? setIsDragging(false) : setIsDraggingXml(false);
   };
 
-  const handleRemoveFile = () => {
-    setUploadedFile(null);
-    setFileName("");
-    const fileInput = document.getElementById("file-upload");
-    if (fileInput) fileInput.value = "";
+  const handleDrop = (e, type) => {
+    e.preventDefault();
+    type === 'pdf' ? setIsDragging(false) : setIsDraggingXml(false);
+    handleFileUpload(e, type);
+  };
+
+  const handleRemoveFile = (type) => {
+    if (type === 'pdf') {
+      setUploadedFile(null);
+      setFileName("");
+      const fileInput = document.getElementById("file-upload");
+      if (fileInput) fileInput.value = "";
+    } else {
+      setUploadedXmlFile(null);
+      setXmlFileName("");
+      const fileInput = document.getElementById("xml-upload");
+      if (fileInput) fileInput.value = "";
+    }
   };
 
   if (!isOpen) return null;
@@ -187,7 +203,7 @@ export default function ModalSaveInvoice({
               <div>
                 <label className="text-sm font-medium text-gray-700 flex items-center gap-2 mb-2">
                   <Upload size={16} className="text-red-600" />
-                  Archivo (PDF/XML)
+                  Archivo PDF
                 </label>
 
                 {!uploadedFile ? (
@@ -195,29 +211,29 @@ export default function ModalSaveInvoice({
                     className={`border-2 border-dashed rounded-xl p-6 text-center transition-colors ${
                       isDragging ? "border-red-500 bg-red-50" : "border-gray-300"
                     }`}
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                    onDrop={handleDrop}
+                    onDragOver={(e) => handleDragOver(e, 'pdf')}
+                    onDragLeave={() => handleDragLeave('pdf')}
+                    onDrop={(e) => handleDrop(e, 'pdf')}
                   >
                     <FileText size={40} className="mx-auto text-gray-400 mb-3" />
                     <p className="font-medium text-gray-700">
-                      Arrastra y suelta tu archivo aquí
+                      Arrastra y suelta tu archivo PDF aquí
                     </p>
                     <p className="text-sm text-gray-500 mt-1">
-                      Se aceptan archivos PDF y XML, máximo 10MB
+                      Solo se aceptan archivos PDF, máximo 10MB
                     </p>
                     <input
                       type="file"
-                      accept=".pdf,.xml"
+                      accept=".pdf"
                       className="hidden"
                       id="file-upload"
-                      onChange={handleFileUpload}
+                      onChange={(e) => handleFileUpload(e, 'pdf')}
                     />
                     <label
                       htmlFor="file-upload"
                       className="inline-block mt-4 px-4 py-2 bg-black text-white text-sm font-medium rounded-lg hover:bg-gray-800 cursor-pointer transition-colors"
                     >
-                      Seleccionar archivo
+                      Seleccionar archivo PDF
                     </label>
                   </div>
                 ) : (
@@ -236,7 +252,71 @@ export default function ModalSaveInvoice({
                       </div>
                       <button
                         type="button"
-                        onClick={handleRemoveFile}
+                        onClick={() => handleRemoveFile('pdf')}
+                        className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50 transition-colors"
+                        aria-label="Eliminar archivo"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Archivo XML */}
+              <div>
+                <label className="text-sm font-medium text-gray-700 flex items-center gap-2 mb-2">
+                  <Upload size={16} className="text-red-600" />
+                  Archivo XML
+                </label>
+
+                {!uploadedXmlFile ? (
+                  <div
+                    className={`border-2 border-dashed rounded-xl p-6 text-center transition-colors ${
+                      isDraggingXml ? "border-red-500 bg-red-50" : "border-gray-300"
+                    }`}
+                    onDragOver={(e) => handleDragOver(e, 'xml')}
+                    onDragLeave={() => handleDragLeave('xml')}
+                    onDrop={(e) => handleDrop(e, 'xml')}
+                  >
+                    <FileText size={40} className="mx-auto text-gray-400 mb-3" />
+                    <p className="font-medium text-gray-700">
+                      Arrastra y suelta tu archivo XML aquí
+                    </p>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Solo se aceptan archivos XML, máximo 10MB
+                    </p>
+                    <input
+                      type="file"
+                      accept=".xml"
+                      className="hidden"
+                      id="xml-upload"
+                      onChange={(e) => handleFileUpload(e, 'xml')}
+                    />
+                    <label
+                      htmlFor="xml-upload"
+                      className="inline-block mt-4 px-4 py-2 bg-black text-white text-sm font-medium rounded-lg hover:bg-gray-800 cursor-pointer transition-colors"
+                    >
+                      Seleccionar archivo XML
+                    </label>
+                  </div>
+                ) : (
+                  <div className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-green-100 rounded-full text-green-600">
+                          <Check size={16} />
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-900">{xmlFileName}</p>
+                          <p className="text-xs text-gray-500">
+                            {(uploadedXmlFile.size / 1024 / 1024).toFixed(2)} MB
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveFile('xml')}
                         className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-50 transition-colors"
                         aria-label="Eliminar archivo"
                       >

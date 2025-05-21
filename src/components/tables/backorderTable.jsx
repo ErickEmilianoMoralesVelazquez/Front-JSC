@@ -38,11 +38,14 @@ export default function BackordersTable() {
   const fetchShipments = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:3001/shipments", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_URL_BACKEND}shipments`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (!response.ok) throw new Error("Error al obtener envíos");
 
@@ -57,11 +60,14 @@ export default function BackordersTable() {
   const fetchOrders = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:3001/orders", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_URL_BACKEND}orders`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (!response.ok) throw new Error("Error al obtener pedidos");
 
@@ -77,7 +83,7 @@ export default function BackordersTable() {
     try {
       const token = localStorage.getItem("token");
       const res = await fetch(
-        `http://localhost:3001/shipments/${envioId}/status`,
+        `${import.meta.env.VITE_URL_BACKEND}shipments/${envioId}/status`,
         {
           method: "PATCH",
           headers: {
@@ -102,14 +108,17 @@ export default function BackordersTable() {
     e.preventDefault();
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:3001/shipments", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(newShipment),
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_URL_BACKEND}shipments`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(newShipment),
+        }
+      );
 
       if (!response.ok) throw new Error("Error al crear el envío");
 
@@ -123,11 +132,20 @@ export default function BackordersTable() {
       });
       // Aquí podrías actualizar la lista de envíos
       fetchShipments();
-      
     } catch (error) {
       console.error("Error creating shipment:", error);
       toast.error("Error al crear el envío");
     }
+  };
+
+  const handleCloseModal = () => {
+    setIsCreateModalOpen(false);
+    setNewShipment({
+      pedido_id: "",
+      numero_guia: "",
+      empresa_paqueteria: "",
+      detalles: "",
+    });
   };
 
   const filtered = shipments.filter((item) => {
@@ -233,7 +251,7 @@ export default function BackordersTable() {
                       Ver detalles del envío
                     </div>
                   </div>
-                
+
                   {envio.estado === "en_proceso" && (
                     <div className="group relative">
                       <Send
@@ -245,12 +263,14 @@ export default function BackordersTable() {
                       </div>
                     </div>
                   )}
-                
+
                   {envio.estado === "enviado" && (
                     <div className="group relative">
                       <CheckCircle
                         className="w-4 h-4 text-green-500 cursor-pointer hover:scale-110 transition"
-                        onClick={() => handleStatusUpdate(envio.id, "entregado")}
+                        onClick={() =>
+                          handleStatusUpdate(envio.id, "entregado")
+                        }
                       />
                       <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1 bg-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition pointer-events-none whitespace-nowrap">
                         Marcar pedido como entregado
@@ -389,7 +409,7 @@ export default function BackordersTable() {
       {/* Modal para crear nuevo envío */}
       <Dialog
         open={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
+        onClose={handleCloseModal}
         className="relative z-50"
       >
         <AnimatePresence>
@@ -419,7 +439,7 @@ export default function BackordersTable() {
                       </p>
                     </div>
                     <button
-                      onClick={() => setIsCreateModalOpen(false)}
+                      onClick={handleCloseModal}
                       className="p-1 rounded-full hover:bg-gray-100 transition-colors"
                     >
                       <X
@@ -556,11 +576,12 @@ export default function BackordersTable() {
                     >
                       <button
                         type="button"
-                        onClick={() => setIsCreateModalOpen(false)}
+                        onClick={handleCloseModal}
                         className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg text-sm transition-colors"
                       >
                         Cancelar
                       </button>
+
                       <button
                         type="submit"
                         className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"

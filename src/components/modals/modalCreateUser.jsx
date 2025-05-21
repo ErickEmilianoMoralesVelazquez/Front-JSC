@@ -25,7 +25,7 @@ export default function ModalCreateUser({ isOpen, onClose, onSave }) {
       const payload = {
         nombre: form.nombre,
         correo: form.correo,
-        contraseña: form.contraseña || "12345678",
+        contraseña: form.contraseña,
         rol: form.rol,
       };
 
@@ -34,7 +34,7 @@ export default function ModalCreateUser({ isOpen, onClose, onSave }) {
       }
 
       const res = await axios.post(
-        "http://localhost:3001/auth/register",
+        `${import.meta.env.VITE_URL_BACKEND}auth/register`,
         payload
       );
 

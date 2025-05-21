@@ -27,7 +27,7 @@ export default function InvoicesTable() {
   const fetchUsers = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:3001/users/list", {
+      const response = await fetch(`${import.meta.env.VITE_URL_BACKEND}users/list`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -44,7 +44,7 @@ export default function InvoicesTable() {
   const fetchInvoices = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:3001/invoices", {
+      const response = await fetch(`${import.meta.env.VITE_URL_BACKEND}invoices`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -72,7 +72,7 @@ export default function InvoicesTable() {
         formData.append("factura_xml", newInvoice.archivo);
       }
 
-      const response = await fetch("http://localhost:3001/invoices", {
+      const response = await fetch(`${import.meta.env.VITE_URL_BACKEND}invoices`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
