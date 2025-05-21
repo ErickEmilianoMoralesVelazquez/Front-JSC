@@ -23,7 +23,7 @@ export default function OrdersTable() {
   const fetchOrders = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:3001/orders/", {
+      const res = await axios.get(`${import.meta.env.VITE_URL_BACKEND}orders/`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -104,7 +104,6 @@ export default function OrdersTable() {
   return (
     <div className="p-6 bg-white rounded-xl shadow-md">
       <h2 className="text-xl font-bold mb-4">Pedidos</h2>
-
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
         <select
           value={estadoFilter}
@@ -117,14 +116,12 @@ export default function OrdersTable() {
           <option value="rechazado">Rechazado</option>
           <option value="cotizado">Cotizado</option>
         </select>
-
         <input
           type="date"
           value={fechaDesde}
           onChange={(e) => setFechaDesde(e.target.value)}
           className="border border-gray-300 px-3 py-2 rounded-md text-sm"
         />
-
         <input
           type="date"
           value={fechaHasta}

@@ -33,7 +33,7 @@ export default function UsersTable() {
   const fetchUsers = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:3001/users/list", {
+      const res = await axios.get(`${import.meta.env.VITE_URL_BACKEND}users/list`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -50,7 +50,7 @@ export default function UsersTable() {
   const handleCreate = async (newUser) => {
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.post("http://localhost:3001/users", newUser, {
+      const response = await axios.post(`${import.meta.env.VITE_URL_BACKEND}users`, newUser, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -68,7 +68,7 @@ export default function UsersTable() {
   const handleDelete = async () => {
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(`http://localhost:3001/users/${confirmDeleteId}`, {
+      await axios.delete(`${import.meta.env.VITE_URL_BACKEND}users/${confirmDeleteId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -85,7 +85,7 @@ export default function UsersTable() {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.patch(
-        `http://localhost:3001/users/${updatedUser.id}`,
+        `${import.meta.env.VITE_URL_BACKEND}users/${updatedUser.id}`,
         updatedUser,
         {
           headers: {

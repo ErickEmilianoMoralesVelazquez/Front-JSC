@@ -54,7 +54,7 @@ export default function QuotesTable() {
   const fetchQuotes = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:3001/quotations", {
+      const res = await fetch(`${import.meta.env.VITE_URL_BACKEND}quotations`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -96,7 +96,7 @@ export default function QuotesTable() {
       formData.append("descripcion", "Cotización generada por admin");
 
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:3001/quotations", {
+      const res = await fetch(`${import.meta.env.VITE_URL_BACKEND}quotations`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,

@@ -24,7 +24,7 @@ export default function PaymentsTable() {
     const fetchUsers = async () => {
       try {
         const token = localStorage.getItem("token");
-        const response = await fetch("http://localhost:3001/users/list", {
+        const response = await fetch(`${import.meta.env.VITE_URL_BACKEND}users/list`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -50,7 +50,7 @@ export default function PaymentsTable() {
   const fetchOrders = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:3001/payments", {
+      const response = await fetch(`${import.meta.env.VITE_URL_BACKEND}payments`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -75,7 +75,7 @@ export default function PaymentsTable() {
 
       const token = localStorage.getItem("token");
       const response = await fetch(
-        `http://localhost:3001/payments/${selectedOrderId}`,
+        `${import.meta.env.VITE_URL_BACKEND}payments/${selectedOrderId}`,
         {
           method: "POST",
           headers: {
@@ -168,7 +168,7 @@ export default function PaymentsTable() {
             <button
               onClick={() => {
                 setSelectedOrderId(row.id);
-                setMontoAPagar(row.monto_total || ""); // solo si lo tienes
+                setMontoAPagar(row.monto_total || "");
                 setIsModalOpen(true);
               }}
               className="flex items-center gap-1 px-2 py-1 text-sm bg-green-500 text-white rounded-full hover:bg-green-600 transition"
@@ -186,7 +186,6 @@ export default function PaymentsTable() {
   return (
     <div className="bg-white p-6 rounded-xl shadow-md">
       <h2 className="text-xl font-bold mb-4">Gestión de Pagos</h2>
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
         <input
           type="text"
@@ -195,7 +194,6 @@ export default function PaymentsTable() {
           onChange={(e) => setSearchText(e.target.value)}
           className="border border-gray-300 px-3 py-2 rounded-md text-sm"
         />
-
         <select
           value={selectedClient}
           onChange={(e) => setSelectedClient(e.target.value)}

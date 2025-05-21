@@ -41,7 +41,7 @@ export default function QuotesGaseraTable() {
   const fetchQuotes = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:3001/quotations", {
+      const res = await fetch(`${import.meta.env.VITE_URL_BACKEND}quotations`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -111,8 +111,8 @@ export default function QuotesGaseraTable() {
 
       const endpoint =
         currentAction === "Aceptada"
-          ? `http://localhost:3001/quotations/${idNumerico}/accept`
-          : `http://localhost:3001/quotations/${idNumerico}/reject`;
+          ? `${import.meta.env.VITE_URL_BACKEND}quotations/${idNumerico}/accept`
+          : `${import.meta.env.VITE_URL_BACKEND}quotations/${idNumerico}/reject`;
 
       const res = await fetch(endpoint, {
         method: "POST",
@@ -156,7 +156,7 @@ export default function QuotesGaseraTable() {
     try {
       const token = localStorage.getItem("token");
       const res = await fetch(
-        `http://localhost:3001/quotations/${quoteIdToPay}/set-payment-date`,
+        `${import.meta.env.VITE_URL_BACKEND}quotations/${quoteIdToPay}/set-payment-date`,
         {
           method: "POST",
           headers: {

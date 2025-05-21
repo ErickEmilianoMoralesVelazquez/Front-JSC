@@ -33,7 +33,7 @@ export default function ModalSaveQuote({ isOpen, onClose, onSave }) {
   const fetchClientes = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:3001/users/list", {
+      const res = await fetch(`${import.meta.env.VITE_URL_BACKEND}users/list`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -51,12 +51,13 @@ export default function ModalSaveQuote({ isOpen, onClose, onSave }) {
       setClientes([]);
     }
   };
+  
 
   const fetchPedidosByCliente = async (clienteId) => {
     try {
       const token = localStorage.getItem("token");
       const res = await fetch(
-        `http://localhost:3001/orders/by-client/${clienteId}`,
+        `${import.meta.env.VITE_URL_BACKEND}orders/by-client/${clienteId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
